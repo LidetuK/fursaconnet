@@ -1,0 +1,15 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm run start:prod"
+healthcheckPath = "/"
+healthcheckTimeout = 600
+
+[deploy.envs]
+NIXPACKS_NODE_VERSION = "20"
+NIXPACKS_NODE_PACKAGE_MANAGER = "npm"
+
+# Add build step
+[build.steps]
+build = "npm run build" 

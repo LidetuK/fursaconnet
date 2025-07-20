@@ -1,0 +1,14 @@
+
+project_id = "ajlytimpconhazplejln"
+# This file is used to configure your Supabase project.
+# It's very minimal at the moment and uses default values.
+# Learn more: https://supabase.com/docs/guides/functions/config
+
+[functions.huggingface-api]
+verify_jwt = true
+
+[functions.social-auth]
+verify_jwt = true
+
+[functions.get-social-accounts]
+verify_jwt = true

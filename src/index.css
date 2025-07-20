@@ -1,0 +1,236 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%; /* #FAFAFA */
+    --foreground: 0 0% 20%; /* #333333 */
+    
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 0 0% 20%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    
+    --primary: 174 75% 29%; /* #0B9581 */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 96%; /* #F5F5F5 */
+    --secondary-foreground: 0 0% 20%;
+    
+    --muted: 0 0% 96%; /* #F5F5F5 */
+    --muted-foreground: 0 0% 45%;
+    
+    --accent: 174 75% 29%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 90%; /* #E5E5E5 */
+    --input: 0 0% 100%;
+    --ring: 174 75% 29%;
+    
+    --radius: 0.75rem;
+    
+    /* Light dashboard variables with green branding */
+    --dashboard-bg: 0 0% 98%;
+    --dashboard-card: 0 0% 100%;
+    --dashboard-border: 0 0% 90%;
+    --neon-green: 174 75% 29%;
+    --neon-green-glow: 174 75% 29%;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(229, 229, 229, 0.5);
+    
+    --sidebar-background: 0 0% 97%; /* #F7F7F7 */
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 174 75% 29%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 174 75% 29%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 174 75% 29%;
+    --sidebar-active: 174 60% 95%; /* Light green for active state */
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.05) 0%, hsl(var(--background)) 50%);
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced typography for branding */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  .text-brand-primary {
+    color: #00855A;
+  }
+
+  .bg-brand-primary {
+    background-color: #00855A;
+  }
+}
+
+@layer components {
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold mb-2 tracking-tight;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .section-subtitle {
+    @apply text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-xl bg-card/60 border border-border/50 rounded-2xl shadow-2xl hover:shadow-2xl transition-all duration-500;
+    background: linear-gradient(135deg, hsl(var(--card))/60, hsl(var(--card))/40);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 40px hsl(var(--primary))/20;
+  }
+  
+  .neon-border {
+    box-shadow: 0 0 20px hsl(var(--neon-green))/30, inset 0 0 20px hsl(var(--neon-green))/10;
+    border: 1px solid hsl(var(--neon-green))/30;
+  }
+  
+  .futuristic-card {
+    @apply glass-card neon-border hover:scale-[1.02] transition-all duration-500;
+    background: linear-gradient(135deg, hsl(var(--card))/80, hsl(var(--card))/60);
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-primary-foreground transition-all duration-300 rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105;
+    box-shadow: 0 4px 20px hsl(var(--primary))/30;
+  }
+  
+  .btn-secondary {
+    @apply bg-card/60 text-primary border border-primary/30 hover:bg-primary/10 transition-all duration-300 rounded-xl px-6 py-3 font-semibold backdrop-blur-sm;
+  }
+  
+  .feature-card {
+    @apply futuristic-card p-6 hover:scale-105 transition-all duration-300 cursor-pointer;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent;
+  }
+
+  .futuristic-grid {
+    background-image: 
+      linear-gradient(hsl(var(--neon-green))/10 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--neon-green))/10 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: grid-move 20s linear infinite;
+  }
+  
+  .sidebar-item {
+    @apply relative overflow-hidden rounded-xl transition-all duration-300 hover:bg-primary/10 hover:text-primary;
+  }
+  
+  .sidebar-item::before {
+    content: '';
+    @apply absolute left-0 top-0 h-full w-1 bg-primary transform scale-y-0 transition-transform duration-300 origin-top;
+  }
+  
+  .sidebar-item.active::before {
+    @apply scale-y-100;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-primary/10 text-primary;
+    box-shadow: inset 0 0 10px hsl(var(--primary))/20;
+  }
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px hsl(var(--primary))/30;
+    border-color: hsl(var(--primary))/30;
+  }
+  50% { 
+    box-shadow: 0 0 40px hsl(var(--primary))/50, 0 0 60px hsl(var(--primary))/30;
+    border-color: hsl(var(--primary))/50;
+  }
+}
+
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 30px 30px; }
+}
+
+@keyframes carousel-smooth {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50%)); }
+}
+
+@keyframes scale-in {
+  0% {
+    transform: scale(0.9) translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes neon-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary));
+  }
+  50% { 
+    box-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary));
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+.animate-carousel-smooth {
+  animation: carousel-smooth 40s linear infinite;
+}
+
+.animate-carousel-smooth:hover {
+  animation-play-state: paused;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
