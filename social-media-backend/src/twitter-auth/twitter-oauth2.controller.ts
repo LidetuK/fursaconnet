@@ -229,6 +229,17 @@ export class TwitterOAuth2Controller {
     
     try {
       console.log('Twitter post: Attempting to post to Twitter API');
+      
+      // First, let's check if the token is still valid by getting user info
+      const userInfoRes = await axios.get('https://api.twitter.com/2/users/me', {
+        headers: {
+          'Authorization': `Bearer ${account.access_token}`,
+        },
+      });
+      
+      console.log('Twitter user info response:', userInfoRes.data);
+      
+      // Now post the tweet
       const tweetRes = await axios.post(
         'https://api.twitter.com/2/tweets',
         { text: body.text },
@@ -245,8 +256,16 @@ export class TwitterOAuth2Controller {
       console.error('Twitter post: API error:', {
         status: err.response?.status,
         data: err.response?.data,
-        message: err.message
+        message: err.message,
+        headers: err.response?.headers
       });
+      
+      // Check if it's an authentication error
+      if (err.response?.status === 401) {
+        console.error('Twitter authentication failed - token may be expired or invalid');
+        return res.status(401).json({ error: 'Twitter authentication failed - please reconnect your account' });
+      }
+      
       return res.status(500).json({ error: 'Failed to post tweet', details: err.response?.data || err.message });
     }
   }

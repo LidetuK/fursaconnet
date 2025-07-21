@@ -31,8 +31,17 @@ export class TelegramAuthController {
 
   @Post('connect')
   async connect(@Body() body: ConnectTelegramDto) {
-    // Store in memory for backward compatibility
-    userTelegramChannels[body.userId] = { chatId: body.chatId };
+    console.log('Telegram connect request:', {
+      userId: body.userId,
+      userIdType: typeof body.userId,
+      chatId: body.chatId
+    });
+    
+    // Store in memory for backward compatibility - use string format consistently
+    const userIdString = body.userId.toString();
+    userTelegramChannels[userIdString] = { chatId: body.chatId };
+    
+    console.log('Telegram channels after connect:', Object.keys(userTelegramChannels));
     
     // Also store in database
     await this.socialAccountRepo.upsert({
@@ -57,10 +66,18 @@ export class TelegramAuthController {
     }
     
     const userId = userJwt.sub;
+    const userIdString = userId.toString();
+    
+    console.log('Telegram disconnect request:', {
+      userId: userId,
+      userIdString: userIdString
+    });
     
     try {
       // Remove from memory
-      delete userTelegramChannels[userId];
+      delete userTelegramChannels[userIdString];
+      
+      console.log('Telegram channels after disconnect:', Object.keys(userTelegramChannels));
       
       // Remove from database
       const result = await this.socialAccountRepo.delete({ 
@@ -82,13 +99,34 @@ export class TelegramAuthController {
   async send(@Body() body: SendTelegramMessageDto) {
     console.log('Telegram send request:', { 
       userId: body.userId, 
+      userIdType: typeof body.userId,
       textLength: body.text?.length 
     });
     
-    const channel = userTelegramChannels[body.userId];
+    if (!body.userId || !body.text) {
+      console.error('Telegram send: Missing required parameters');
+      return { success: false, error: 'Missing userId or text parameter' };
+    }
+    
+    // Try to find the channel with different user ID formats
+    let channel = userTelegramChannels[body.userId];
+    if (!channel) {
+      // Try with numeric user ID
+      const numericUserId = parseInt(body.userId, 10);
+      if (!isNaN(numericUserId)) {
+        channel = userTelegramChannels[numericUserId.toString()];
+      }
+    }
+    if (!channel) {
+      // Try with string user ID
+      const stringUserId = body.userId.toString();
+      channel = userTelegramChannels[stringUserId];
+    }
+    
     console.log('Telegram channel found:', { 
       found: !!channel, 
-      chatId: channel?.chatId 
+      chatId: channel?.chatId,
+      availableUserIds: Object.keys(userTelegramChannels)
     });
     
     if (!channel) {
