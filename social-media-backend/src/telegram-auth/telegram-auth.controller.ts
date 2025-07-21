@@ -202,9 +202,9 @@ export class TelegramAuthController {
       console.log('Telegram send with images result:', result);
       return result;
     } else {
-      const result = await this.telegramService.sendMessage(channel.chatId, body.text);
+    const result = await this.telegramService.sendMessage(channel.chatId, body.text);
       console.log('Telegram send result:', result);
-      return result;
+    return result;
     }
   }
 } 

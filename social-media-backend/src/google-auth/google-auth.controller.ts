@@ -61,15 +61,17 @@ export class GoogleAuthController {
       const jwt = this.jwtService.sign(payload);
       // Set JWT as httpOnly cookie
       res.cookie('jwt', jwt, { httpOnly: true });
-      // Redirect to dashboard with success status - let frontend handle the routing
-      const redirectUrl = `${currentDomain}/dashboard?google=connected`;
-      console.log('Redirecting to:', redirectUrl);
+      // Redirect to frontend dashboard with success status
+      const frontendDomain = process.env.FRONTEND_URL || 'https://premium-promospace-frontend-production.up.railway.app';
+      const redirectUrl = `${frontendDomain}/dashboard?google=connected`;
+      console.log('Redirecting to frontend:', redirectUrl);
       return res.redirect(redirectUrl);
     } catch (err) {
       console.error('OAuth error:', err);
-      // Redirect to dashboard with error status
-      const redirectUrl = `${currentDomain}/dashboard?google=error&message=${encodeURIComponent(err.message)}`;
-      console.log('Redirecting to error page:', redirectUrl);
+      // Redirect to frontend dashboard with error status
+      const frontendDomain = process.env.FRONTEND_URL || 'https://premium-promospace-frontend-production.up.railway.app';
+      const redirectUrl = `${frontendDomain}/dashboard?google=error&message=${encodeURIComponent(err.message)}`;
+      console.log('Redirecting to frontend error page:', redirectUrl);
       return res.redirect(redirectUrl);
     }
   }
