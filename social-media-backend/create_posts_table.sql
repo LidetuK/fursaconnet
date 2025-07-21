@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "metadata" JSONB, -- Store additional platform-specific data
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE
+    FOREIGN KEY ("user_id") REFERENCES "smes"("id") ON DELETE CASCADE
 );
 
 -- Create indexes for better performance

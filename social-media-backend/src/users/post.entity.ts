@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { User } from './user.entity';
+import { SMES } from './smes.entity';
 
 @Entity('posts')
 export class Post {
@@ -9,9 +9,9 @@ export class Post {
   @Column('int')
   user_id: number;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SMES, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: SMES;
 
   @Column({ length: 32 })
   platform: string;
