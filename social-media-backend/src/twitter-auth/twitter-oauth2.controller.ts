@@ -256,7 +256,7 @@ export class TwitterOAuth2Controller {
         console.log('Twitter post: Uploading images first');
         
         // Upload images to Twitter media API
-        const mediaIds = [];
+        const mediaIds: string[] = [];
         for (const file of files) {
           try {
             // Convert file to base64
@@ -277,7 +277,9 @@ export class TwitterOAuth2Controller {
             );
             
             console.log('Twitter media upload response:', mediaRes.data);
-            mediaIds.push(mediaRes.data.media_id_string);
+            if (mediaRes.data.media_id_string) {
+              mediaIds.push(mediaRes.data.media_id_string);
+            }
           } catch (mediaError: any) {
             console.error('Twitter media upload error:', mediaError.response?.data || mediaError.message);
             throw new Error(`Failed to upload image: ${mediaError.response?.data?.errors?.[0]?.message || mediaError.message}`);
