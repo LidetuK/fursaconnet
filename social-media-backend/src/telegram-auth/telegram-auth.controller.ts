@@ -40,9 +40,9 @@ export class TelegramAuthController {
       platform: 'telegram',
       platform_user_id: body.chatId,
       screen_name: body.chatId,
-      access_token: null,
-      refresh_token: null,
-      expires_at: null,
+      access_token: undefined,
+      refresh_token: undefined,
+      expires_at: undefined,
     }, ['user_id', 'platform']);
     
     return { success: true, message: 'Telegram channel connected.' };
