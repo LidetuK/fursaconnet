@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Delete, Param, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Delete, Param, Req, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { TelegramAuthService } from './telegram-auth.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -6,6 +6,7 @@ import { SocialAccount } from '../users/social-account.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 // Simple in-memory store for demonstration (replace with DB in production)
 const userTelegramChannels: Record<string, { chatId: string }> = {};
@@ -95,12 +96,71 @@ export class TelegramAuthController {
     }
   }
 
+  @Post('test')
+  async testConnection(@Body() body: { userId: string }) {
+    console.log('Telegram test connection request:', { 
+      userId: body.userId,
+      userIdType: typeof body.userId
+    });
+    
+    if (!body.userId) {
+      return { success: false, error: 'Missing userId parameter' };
+    }
+    
+    // Try to find the channel with different user ID formats
+    let channel = userTelegramChannels[body.userId];
+    if (!channel) {
+      // Try with numeric user ID
+      const numericUserId = parseInt(body.userId, 10);
+      if (!isNaN(numericUserId)) {
+        channel = userTelegramChannels[numericUserId.toString()];
+      }
+    }
+    if (!channel) {
+      // Try with string user ID
+      const stringUserId = body.userId.toString();
+      channel = userTelegramChannels[stringUserId];
+    }
+    
+    console.log('Telegram test - channel found:', { 
+      found: !!channel, 
+      chatId: channel?.chatId,
+      availableUserIds: Object.keys(userTelegramChannels)
+    });
+    
+    if (!channel) {
+      return { success: false, error: 'No Telegram channel connected for this user.' };
+    }
+    
+    // Test the connection by getting chat info
+    try {
+      const result = await this.telegramService.getChatInfo(channel.chatId);
+      return { 
+        success: true, 
+        chatInfo: result,
+        message: 'Telegram connection is working properly.'
+      };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        error: error.message,
+        chatId: channel.chatId
+      };
+    }
+  }
+
   @Post('send')
-  async send(@Body() body: SendTelegramMessageDto) {
+  @UseInterceptors(FilesInterceptor('images', 10)) // Telegram allows up to 10 images
+  async send(
+    @Body() body: SendTelegramMessageDto,
+    @UploadedFiles() files: Express.Multer.File[]
+  ) {
     console.log('Telegram send request:', { 
       userId: body.userId, 
       userIdType: typeof body.userId,
-      textLength: body.text?.length 
+      textLength: body.text?.length,
+      hasFiles: files?.length > 0,
+      fileCount: files?.length || 0
     });
     
     if (!body.userId || !body.text) {
@@ -135,8 +195,16 @@ export class TelegramAuthController {
     }
     
     console.log('Telegram send: Attempting to send message to chatId:', channel.chatId);
-    const result = await this.telegramService.sendMessage(channel.chatId, body.text);
-    console.log('Telegram send result:', result);
-    return result;
+    
+    // Send message with or without images
+    if (files && files.length > 0) {
+      const result = await this.telegramService.sendMessageWithImages(channel.chatId, body.text, files);
+      console.log('Telegram send with images result:', result);
+      return result;
+    } else {
+      const result = await this.telegramService.sendMessage(channel.chatId, body.text);
+      console.log('Telegram send result:', result);
+      return result;
+    }
   }
 } 

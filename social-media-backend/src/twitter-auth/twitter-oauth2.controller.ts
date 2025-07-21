@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res, Query, UseGuards, Body, Post } from '@nestjs/common';
+import { Controller, Get, Req, Res, Query, UseGuards, Body, Post, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { Request, Response } from 'express';
@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SocialAccount } from '../users/social-account.entity';
 import { JwtService } from '@nestjs/jwt';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth/twitter2')
 export class TwitterOAuth2Controller {
@@ -201,11 +202,22 @@ export class TwitterOAuth2Controller {
 
   @UseGuards(JwtAuthGuard)
   @Post('post')
-  async postTweet(@Req() req: Request, @Body() body: { text: string }, @Res() res: Response) {
+  @UseInterceptors(FilesInterceptor('images', 4)) // Twitter allows up to 4 images
+  async postTweet(
+    @Req() req: Request, 
+    @Body() body: { text: string }, 
+    @UploadedFiles() files: Express.Multer.File[],
+    @Res() res: Response
+  ) {
     const user: any = (req as any).user || {};
     const userId = parseInt(user.sub.toString(), 10);
     
-    console.log('Twitter post request:', { userId, textLength: body.text?.length });
+    console.log('Twitter post request:', { 
+      userId, 
+      textLength: body.text?.length,
+      hasFiles: files?.length > 0,
+      fileCount: files?.length || 0
+    });
     
     if (!userId) {
       console.error('Twitter post: Not authenticated');
@@ -239,19 +251,73 @@ export class TwitterOAuth2Controller {
       
       console.log('Twitter user info response:', userInfoRes.data);
       
-      // Now post the tweet
-      const tweetRes = await axios.post(
-        'https://api.twitter.com/2/tweets',
-        { text: body.text },
-        {
-          headers: {
-            'Authorization': `Bearer ${account.access_token}`,
-            'Content-Type': 'application/json',
-          },
+      // Handle image uploads if present
+      if (files && files.length > 0) {
+        console.log('Twitter post: Uploading images first');
+        
+        // Upload images to Twitter media API
+        const mediaIds = [];
+        for (const file of files) {
+          try {
+            // Convert file to base64
+            const base64Data = file.buffer.toString('base64');
+            
+            // Upload to Twitter media API
+            const mediaRes = await axios.post(
+              'https://upload.twitter.com/1.1/media/upload.json',
+              {
+                media_data: base64Data
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${account.access_token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            
+            console.log('Twitter media upload response:', mediaRes.data);
+            mediaIds.push(mediaRes.data.media_id_string);
+          } catch (mediaError: any) {
+            console.error('Twitter media upload error:', mediaError.response?.data || mediaError.message);
+            throw new Error(`Failed to upload image: ${mediaError.response?.data?.errors?.[0]?.message || mediaError.message}`);
+          }
         }
-      );
-      console.log('Twitter post: Success response:', tweetRes.data);
-      return res.json({ success: true, tweet: tweetRes.data });
+        
+        // Post tweet with media
+        const tweetRes = await axios.post(
+          'https://api.twitter.com/2/tweets',
+          {
+            text: body.text,
+            media: {
+              media_ids: mediaIds
+            }
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${account.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        
+        console.log('Twitter post with media: Success response:', tweetRes.data);
+        return res.json({ success: true, tweet: tweetRes.data });
+      } else {
+        // Text-only tweet
+        const tweetRes = await axios.post(
+          'https://api.twitter.com/2/tweets',
+          { text: body.text },
+          {
+            headers: {
+              'Authorization': `Bearer ${account.access_token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        console.log('Twitter post: Success response:', tweetRes.data);
+        return res.json({ success: true, tweet: tweetRes.data });
+      }
     } catch (err: any) {
       console.error('Twitter post: API error:', {
         status: err.response?.status,
