@@ -76,11 +76,11 @@ export class FacebookAuthService {
       });
 
       const pages = response.data.data || [];
-      const instagramAccounts = [];
+      const instagramAccounts: any[] = [];
 
       for (const page of pages) {
         if (page.instagram_business_account) {
-          instagramAccounts.push(page.instagram_business_account);
+          instagramAccounts.push(page.instagram_business_account as any);
         }
       }
 
