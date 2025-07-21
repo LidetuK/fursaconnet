@@ -80,11 +80,25 @@ export class TelegramAuthController {
 
   @Post('send')
   async send(@Body() body: SendTelegramMessageDto) {
+    console.log('Telegram send request:', { 
+      userId: body.userId, 
+      textLength: body.text?.length 
+    });
+    
     const channel = userTelegramChannels[body.userId];
+    console.log('Telegram channel found:', { 
+      found: !!channel, 
+      chatId: channel?.chatId 
+    });
+    
     if (!channel) {
+      console.error('Telegram send: No channel connected for user:', body.userId);
       return { success: false, error: 'No Telegram channel connected for this user.' };
     }
+    
+    console.log('Telegram send: Attempting to send message to chatId:', channel.chatId);
     const result = await this.telegramService.sendMessage(channel.chatId, body.text);
+    console.log('Telegram send result:', result);
     return result;
   }
 } 

@@ -205,7 +205,10 @@ export class TwitterOAuth2Controller {
     const user: any = (req as any).user || {};
     const userId = parseInt(user.sub.toString(), 10);
     
+    console.log('Twitter post request:', { userId, textLength: body.text?.length });
+    
     if (!userId) {
+      console.error('Twitter post: Not authenticated');
       return res.status(401).json({ error: 'Not authenticated' });
     }
     
@@ -213,11 +216,19 @@ export class TwitterOAuth2Controller {
       where: { user_id: userId, platform: 'twitter' },
     });
     
+    console.log('Twitter account found:', { 
+      found: !!account, 
+      hasToken: !!account?.access_token,
+      userId: account?.user_id 
+    });
+    
     if (!account || !account.access_token) {
+      console.error('Twitter post: Account not connected or no access token');
       return res.status(400).json({ error: 'Twitter account not connected' });
     }
     
     try {
+      console.log('Twitter post: Attempting to post to Twitter API');
       const tweetRes = await axios.post(
         'https://api.twitter.com/2/tweets',
         { text: body.text },
@@ -228,8 +239,14 @@ export class TwitterOAuth2Controller {
           },
         }
       );
+      console.log('Twitter post: Success response:', tweetRes.data);
       return res.json({ success: true, tweet: tweetRes.data });
     } catch (err: any) {
+      console.error('Twitter post: API error:', {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message
+      });
       return res.status(500).json({ error: 'Failed to post tweet', details: err.response?.data || err.message });
     }
   }

@@ -179,17 +179,35 @@ export class LinkedInAuthController {
     @Res() res: Response
   ) {
     try {
+      console.log('LinkedIn post request:', { 
+        textLength: body.text?.length, 
+        hasFiles: files?.length > 0,
+        contentType: req.headers['content-type']
+      });
+      
       const jwt = req.cookies['jwt'];
       if (!jwt) {
+        console.error('LinkedIn post: Missing JWT cookie');
         return res.status(401).json({ error: 'Missing authentication token' });
       }
       const payload = this.jwtService.decode(jwt) as any;
       const userId = payload?.sub;
       if (!userId) {
+        console.error('LinkedIn post: Invalid JWT payload');
         return res.status(401).json({ error: 'Invalid session' });
       }
+      
+      console.log('LinkedIn post: User ID from JWT:', userId);
+      
       const user = await this.smesRepository.findOne({ where: { id: userId } });
+      console.log('LinkedIn post: User found:', { 
+        found: !!user, 
+        hasLinkedInToken: !!user?.linkedinAccessToken,
+        hasLinkedInUserId: !!user?.linkedinUserId 
+      });
+      
       if (!user || !user.linkedinAccessToken || !user.linkedinUserId) {
+        console.error('LinkedIn post: User not connected to LinkedIn');
         return res.status(400).json({ error: 'LinkedIn not connected' });
       }
       // Determine author URN
@@ -199,12 +217,28 @@ export class LinkedInAuthController {
       } else {
         authorUrn = `urn:li:person:${user.linkedinUserId}`;
       }
-      await this.linkedinAuthService.postToLinkedInWithImages(
-        user.linkedinAccessToken,
-        authorUrn,
-        body.text,
-        files
-      );
+      
+      console.log('LinkedIn post: Using author URN:', authorUrn);
+      
+      // Use appropriate method based on whether there are images
+      if (files && files.length > 0) {
+        console.log('LinkedIn post: Using postToLinkedInWithImages');
+        await this.linkedinAuthService.postToLinkedInWithImages(
+          user.linkedinAccessToken,
+          authorUrn,
+          body.text,
+          files
+        );
+      } else {
+        console.log('LinkedIn post: Using postToLinkedIn');
+        await this.linkedinAuthService.postToLinkedIn(
+          user.linkedinAccessToken,
+          user.linkedinUserId,
+          body.text
+        );
+      }
+      
+      console.log('LinkedIn post: Success');
       return res.json({ success: true });
     } catch (err) {
       console.error('LinkedIn post error:', err);
