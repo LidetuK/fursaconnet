@@ -66,9 +66,11 @@ export class InstagramAuthController {
         }, ['user_id', 'platform', 'platform_user_id']);
       }
 
-      // Redirect to dashboard
+      // Set JWT as httpOnly cookie
+      res.cookie('jwt', jwt, { httpOnly: true });
+      // Redirect to dashboard - let frontend handle the routing
       const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
-      return res.redirect(`${frontendDomain}/dashboard#social`);
+      return res.redirect(`${frontendDomain}/dashboard`);
     } catch (err) {
       console.error('Instagram OAuth error:', err);
       return res.status(500).json({ error: 'OAuth failed', details: err.message });

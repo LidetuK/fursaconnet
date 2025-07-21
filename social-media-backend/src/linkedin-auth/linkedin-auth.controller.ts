@@ -66,12 +66,16 @@ export class LinkedInAuthController {
         expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
         screen_name: userInfo.name || userInfo.localizedFirstName || '',
       }, ['user_id', 'platform']);
-      // Redirect to dashboard or success page
+      // Set JWT as httpOnly cookie
+      res.cookie('jwt', jwt, { httpOnly: true });
+      // Redirect to dashboard with success status - let frontend handle the routing
       const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
-      return res.redirect(`${frontendDomain}/dashboard#social`);
+      return res.redirect(`${frontendDomain}/dashboard?linkedin=connected`);
     } catch (err) {
       console.error('LinkedIn OAuth error:', err);
-      return res.status(500).json({ error: 'OAuth failed', details: err.message });
+      // Redirect to dashboard with error status
+      const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+      return res.redirect(`${frontendDomain}/dashboard?linkedin=error&message=${encodeURIComponent(err.message)}`);
     }
   }
 

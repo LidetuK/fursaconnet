@@ -61,12 +61,16 @@ export class GoogleAuthController {
       const jwt = this.jwtService.sign(payload);
       // Set JWT as httpOnly cookie
       res.cookie('jwt', jwt, { httpOnly: true });
-      // Redirect to dashboard
-      const redirectUrl = `${currentDomain}/dashboard#social-media-marketing`;
+      // Redirect to dashboard with success status - let frontend handle the routing
+      const redirectUrl = `${currentDomain}/dashboard?google=connected`;
+      console.log('Redirecting to:', redirectUrl);
       return res.redirect(redirectUrl);
     } catch (err) {
       console.error('OAuth error:', err);
-      return res.status(500).json({ error: 'OAuth failed', details: err.message });
+      // Redirect to dashboard with error status
+      const redirectUrl = `${currentDomain}/dashboard?google=error&message=${encodeURIComponent(err.message)}`;
+      console.log('Redirecting to error page:', redirectUrl);
+      return res.redirect(redirectUrl);
     }
   }
 
