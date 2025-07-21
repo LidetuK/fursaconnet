@@ -67,7 +67,8 @@ export class LinkedInAuthController {
         screen_name: userInfo.name || userInfo.localizedFirstName || '',
       }, ['user_id', 'platform']);
       // Redirect to dashboard or success page
-      return res.redirect('http://localhost:8080/dashboard#social');
+      const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+      return res.redirect(`${frontendDomain}/dashboard#social`);
     } catch (err) {
       console.error('LinkedIn OAuth error:', err);
       return res.status(500).json({ error: 'OAuth failed', details: err.message });

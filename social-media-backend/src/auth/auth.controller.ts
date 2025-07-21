@@ -33,9 +33,9 @@ export class AuthController {
     if (user[0]) {
       // Admin user found
       console.log('Admin user found, checking password...');
-      const valid = await bcrypt.compare(body.password, user[0].password_hash);
+    const valid = await bcrypt.compare(body.password, user[0].password_hash);
       console.log('Password valid:', valid);
-      if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!valid) throw new UnauthorizedException('Invalid credentials');
       
       const payload = { 
         sub: user[0].id, 
@@ -49,7 +49,7 @@ export class AuthController {
       
       // Set JWT cookie
       const cookieOptions = {
-        httpOnly: true,
+        httpOnly: true, 
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -61,7 +61,7 @@ export class AuthController {
       console.log('JWT cookie set successfully');
       
       const response = {
-        access_token: token,
+      access_token: token,
         user: { 
           id: user[0].id, 
           username: user[0].username, 
@@ -100,7 +100,7 @@ export class AuthController {
       
       // Set JWT cookie
       const cookieOptions = {
-        httpOnly: true,
+        httpOnly: true, 
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -152,7 +152,7 @@ export class AuthController {
       
       // Set JWT cookie
       const cookieOptions = {
-        httpOnly: true,
+        httpOnly: true, 
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax' as const,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -276,15 +276,15 @@ export class AuthController {
       if (userJwt.is_admin === true) {
         console.log('Checking admin_users table...');
         try {
-          const adminUser = await this.dataSource.query(
-            'SELECT id, username, is_admin FROM admin_users WHERE id = $1',
+        const adminUser = await this.dataSource.query(
+          'SELECT id, username, is_admin FROM admin_users WHERE id = $1',
             [userId]
-          );
+        );
           console.log('Admin user query result:', adminUser);
-          if (adminUser[0]) {
+        if (adminUser[0]) {
             console.log('Admin user found:', adminUser[0]);
-            return { user: adminUser[0] };
-          }
+          return { user: adminUser[0] };
+        }
         } catch (error) {
           console.error('Error querying admin_users table:', error);
         }
@@ -294,15 +294,15 @@ export class AuthController {
       if (userJwt.is_sme === true) {
         console.log('Checking smes table...');
         try {
-          const sme = await this.dataSource.query(
-            'SELECT id, email, company_name FROM smes WHERE id = $1',
+      const sme = await this.dataSource.query(
+        'SELECT id, email, company_name FROM smes WHERE id = $1',
             [userId]
-          );
+      );
           console.log('SME user query result:', sme);
-          if (sme[0]) {
+      if (sme[0]) {
             console.log('SME user found:', sme[0]);
-            return { user: { ...sme[0], is_sme: true } };
-          }
+        return { user: { ...sme[0], is_sme: true } };
+      }
         } catch (error) {
           console.error('Error querying smes table:', error);
         }
