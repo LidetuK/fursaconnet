@@ -29,7 +29,7 @@ export class GoogleBusinessController {
       console.log('Fetching Google Business Profile data with token:', googleAccessToken.substring(0, 20) + '...');
       
       // First, try to get user's business accounts
-      let businessData = null;
+      let businessData: any = null;
       
       try {
         // Use the newer Business Profile API
