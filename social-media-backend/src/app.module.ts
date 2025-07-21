@@ -13,6 +13,7 @@ import { LinkedInAuthController } from './linkedin-auth/linkedin-auth.controller
 import { LinkedInAuthService } from './linkedin-auth/linkedin-auth.service';
 import { UsersController } from './users/users.controller';
 import { SocialAccount } from './users/social-account.entity';
+import { Post } from './users/post.entity';
 import { TwitterOAuth2Controller } from './twitter-auth/twitter-oauth2.controller';
 import { GoogleAdsController } from './google-ads/google-ads.controller';
 import { YouTubeAuthController } from './youtube-auth.controller';
@@ -23,6 +24,7 @@ import { FacebookAuthService } from './facebook-auth/facebook-auth.service';
 import { InstagramAuthController } from './instagram-auth/instagram-auth.controller';
 import { InstagramAuthService } from './instagram-auth/instagram-auth.service';
 import { ExpertsModule } from './experts/experts.module';
+import { PostsController } from './posts/posts.controller';
 
 @Module({
   imports: [
@@ -44,16 +46,16 @@ import { ExpertsModule } from './experts/experts.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [SMES, SocialAccount],
+        entities: [SMES, SocialAccount, Post],
         synchronize: false, // set to false in production!
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([SMES, SocialAccount]),
+    TypeOrmModule.forFeature([SMES, SocialAccount, Post]),
     AuthModule,
     ExpertsModule,
   ],
-  controllers: [AppController, GoogleAuthController, LinkedInAuthController, UsersController, TwitterOAuth2Controller, GoogleAdsController, YouTubeAuthController, TelegramAuthController, FacebookAuthController, InstagramAuthController],
+  controllers: [AppController, GoogleAuthController, LinkedInAuthController, UsersController, TwitterOAuth2Controller, GoogleAdsController, YouTubeAuthController, TelegramAuthController, FacebookAuthController, InstagramAuthController, PostsController],
   providers: [AppService, GoogleAuthService, LinkedInAuthService, TelegramAuthService, FacebookAuthService, InstagramAuthService],
 })
 export class AppModule {}
