@@ -18,6 +18,10 @@ import { GoogleAdsController } from './google-ads/google-ads.controller';
 import { YouTubeAuthController } from './youtube-auth.controller';
 import { TelegramAuthController } from './telegram-auth/telegram-auth.controller';
 import { TelegramAuthService } from './telegram-auth/telegram-auth.service';
+import { FacebookAuthController } from './facebook-auth/facebook-auth.controller';
+import { FacebookAuthService } from './facebook-auth/facebook-auth.service';
+import { InstagramAuthController } from './instagram-auth/instagram-auth.controller';
+import { InstagramAuthService } from './instagram-auth/instagram-auth.service';
 import { ExpertsModule } from './experts/experts.module';
 
 @Module({
@@ -49,7 +53,7 @@ import { ExpertsModule } from './experts/experts.module';
     AuthModule,
     ExpertsModule,
   ],
-  controllers: [AppController, GoogleAuthController, LinkedInAuthController, UsersController, TwitterOAuth2Controller, GoogleAdsController, YouTubeAuthController, TelegramAuthController],
-  providers: [AppService, GoogleAuthService, LinkedInAuthService, TelegramAuthService],
+  controllers: [AppController, GoogleAuthController, LinkedInAuthController, UsersController, TwitterOAuth2Controller, GoogleAdsController, YouTubeAuthController, TelegramAuthController, FacebookAuthController, InstagramAuthController],
+  providers: [AppService, GoogleAuthService, LinkedInAuthService, TelegramAuthService, FacebookAuthService, InstagramAuthService],
 })
 export class AppModule {}
