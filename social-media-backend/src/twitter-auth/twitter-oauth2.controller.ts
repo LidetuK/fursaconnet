@@ -263,7 +263,7 @@ export class TwitterOAuth2Controller {
             const base64Data = file.buffer.toString('base64');
             
             // Upload to Twitter media API
-            const mediaRes = await axios.post(
+            const mediaRes = await axios.post<{ media_id_string: string }>(
               'https://upload.twitter.com/1.1/media/upload.json',
               {
                 media_data: base64Data
@@ -287,7 +287,7 @@ export class TwitterOAuth2Controller {
         }
         
         // Post tweet with media
-        const tweetRes = await axios.post(
+        const tweetRes = await axios.post<{ data: any }>(
           'https://api.twitter.com/2/tweets',
           {
             text: body.text,
@@ -307,7 +307,7 @@ export class TwitterOAuth2Controller {
         return res.json({ success: true, tweet: tweetRes.data });
       } else {
         // Text-only tweet
-        const tweetRes = await axios.post(
+        const tweetRes = await axios.post<{ data: any }>(
           'https://api.twitter.com/2/tweets',
           { text: body.text },
           {
