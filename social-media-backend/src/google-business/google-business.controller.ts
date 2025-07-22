@@ -1,6 +1,7 @@
 import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { DataSource } from 'typeorm';
 import axios from 'axios';
 
 interface GoogleBusinessData {
@@ -41,12 +42,13 @@ interface GoogleBusinessData {
 
 @Controller('auth/google-business')
 export class GoogleBusinessController {
+  constructor(private readonly dataSource: DataSource) {}
   
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getBusinessProfile(@Req() req: Request, @Res() res: Response) {
     const user: any = (req as any).user || {};
-    const userId = parseInt(user.sub.toString(), 10);
+    const userId = user.sub;
     
     console.log('Google Business profile request:', { userId });
     
@@ -56,8 +58,27 @@ export class GoogleBusinessController {
     }
     
     try {
-      // Get Google access token from JWT
-      const googleAccessToken = user.googleAccessToken;
+      // Get Google Business access token from database
+      const googleBusinessAccount = await this.dataSource.query(
+        'SELECT access_token, refresh_token, expires_at FROM google_business_accounts WHERE user_id = $1',
+        [userId]
+      );
+      
+      if (!googleBusinessAccount || googleBusinessAccount.length === 0) {
+        console.log('No Google Business account found for user:', userId);
+        return res.status(400).json({ error: 'Google Business account not connected' });
+      }
+      
+      const account = googleBusinessAccount[0];
+      const googleAccessToken = account.access_token;
+      
+      // Check if token is expired
+      if (account.expires_at && new Date(account.expires_at) < new Date()) {
+        console.log('Google Business access token expired, attempting refresh...');
+        // TODO: Implement token refresh logic
+        return res.status(400).json({ error: 'Google Business access token expired. Please reconnect.' });
+      }
+      
       if (!googleAccessToken) {
         return res.status(400).json({ error: 'No Google access token found. Please re-authenticate.' });
       }
@@ -269,70 +290,42 @@ export class GoogleBusinessController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('insights')
-  async getBusinessInsights(@Req() req: Request, @Res() res: Response) {
+  @Get('connection-status')
+  async getConnectionStatus(@Req() req: Request, @Res() res: Response) {
     const user: any = (req as any).user || {};
-    const userId = parseInt(user.sub.toString(), 10);
+    const userId = user.sub;
+    
+    console.log('Checking Google Business connection status for user:', userId);
     
     if (!userId) {
       return res.status(401).json({ error: 'Not authenticated' });
     }
     
     try {
-      // Mock insights data
-      const mockInsights = {
-        period: "last_30_days",
-        metrics: {
-          views: {
-            total: 15420,
-            search: 12350,
-            maps: 2870,
-            photos: 200,
-            trend: "+12.5%"
-          },
-          actions: {
-            calls: 89,
-            directionRequests: 156,
-            websiteClicks: 234,
-            trend: "+8.3%"
-          },
-          engagement: {
-            reviews: 12,
-            photos: 8,
-            posts: 5,
-            trend: "+15.2%"
-          }
-        },
-        topSearchTerms: [
-          "digital marketing agency",
-          "web development services",
-          "SEO optimization",
-          "social media marketing",
-          "premium promospace"
-        ],
-        customerDemographics: {
-          ageGroups: {
-            "18-24": 15,
-            "25-34": 35,
-            "35-44": 28,
-            "45-54": 15,
-            "55+": 7
-          },
-          gender: {
-            male: 45,
-            female: 55
-          }
-        }
-      };
+      const googleBusinessAccount = await this.dataSource.query(
+        'SELECT id, created_at, expires_at FROM google_business_accounts WHERE user_id = $1',
+        [userId]
+      );
       
-      return res.json(mockInsights);
-      
+      if (googleBusinessAccount && googleBusinessAccount.length > 0) {
+        const account = googleBusinessAccount[0];
+        const isExpired = account.expires_at && new Date(account.expires_at) < new Date();
+        
+        return res.json({
+          connected: true,
+          connectedAt: account.created_at,
+          isExpired: isExpired
+        });
+      } else {
+        return res.json({
+          connected: false,
+          connectedAt: null,
+          isExpired: false
+        });
+      }
     } catch (err: any) {
-      console.error('Google Business Insights: API error:', err);
-      return res.status(500).json({ 
-        error: 'Failed to fetch business insights', 
-        details: err.message 
-      });
+      console.error('Error checking Google Business connection status:', err);
+      return res.status(500).json({ error: 'Failed to check connection status' });
     }
   }
 } 

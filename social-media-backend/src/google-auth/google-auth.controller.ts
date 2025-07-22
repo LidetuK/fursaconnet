@@ -3,12 +3,14 @@ import { GoogleAuthService } from './google-auth.service';
 import { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
+import { DataSource } from 'typeorm';
 
 @Controller('auth/google')
 export class GoogleAuthController {
   constructor(
     private readonly googleAuthService: GoogleAuthService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly dataSource: DataSource
   ) {}
 
   @Get()
@@ -51,12 +53,61 @@ export class GoogleAuthController {
       console.log('Tokens:', tokens);
       const userInfo = await this.googleAuthService.getUserInfo(tokens.access_token);
       console.log('UserInfo:', userInfo);
+      
+      // Check if this is a Google Business OAuth (has business.manage scope)
+      const isGoogleBusinessOAuth = scope && scope.includes('business.manage');
+      console.log('Is Google Business OAuth:', isGoogleBusinessOAuth);
+      
+      if (isGoogleBusinessOAuth) {
+        // Save Google Business connection to database
+        try {
+          // Get user ID from state parameter or create a new user
+          let userId = userInfo.id;
+          if (state) {
+            try {
+              const stateData = JSON.parse(decodeURIComponent(state));
+              userId = stateData.userId || userInfo.id;
+            } catch (e) {
+              console.log('Could not parse state, using user ID from userInfo');
+            }
+          }
+          
+          console.log('Saving Google Business connection for user:', userId);
+          
+          // Save to google_business_accounts table
+          await this.dataSource.query(
+            `INSERT INTO google_business_accounts (user_id, google_user_id, access_token, refresh_token, expires_at, created_at, updated_at) 
+             VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+             ON CONFLICT (user_id) 
+             DO UPDATE SET 
+               google_user_id = EXCLUDED.google_user_id,
+               access_token = EXCLUDED.access_token,
+               refresh_token = EXCLUDED.refresh_token,
+               expires_at = EXCLUDED.expires_at,
+               updated_at = NOW()`,
+            [
+              userId,
+              userInfo.id,
+              tokens.access_token,
+              tokens.refresh_token,
+              new Date(Date.now() + (tokens.expires_in * 1000))
+            ]
+          );
+          
+          console.log('Google Business connection saved to database');
+        } catch (dbError) {
+          console.error('Error saving Google Business connection to database:', dbError);
+          // Continue with OAuth flow even if database save fails
+        }
+      }
+      
       // Issue JWT
       const payload = {
         email: userInfo.email,
         sub: userInfo.id,
         name: userInfo.name,
         googleAccessToken: tokens.access_token, // Add Google access token to JWT
+        hasGoogleBusiness: isGoogleBusinessOAuth, // Track if this is a Google Business connection
       };
       const jwt = this.jwtService.sign(payload);
       // Set JWT as httpOnly cookie
