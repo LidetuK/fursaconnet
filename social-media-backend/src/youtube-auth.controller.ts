@@ -230,26 +230,45 @@ export class YouTubeAuthController {
 
   @Get('channel')
   async getChannelInfo(@Req() req: Request, @Res() res: Response) {
-    // 1. Get user from JWT cookie
-    const jwt = req.cookies['jwt'];
-    if (!jwt) {
-      return res.status(401).json({ error: 'Missing authentication token' });
-    }
-    const payload = this.jwtService.decode(jwt) as any;
-    const userId = payload?.sub;
-    if (!userId) {
-      return res.status(401).json({ error: 'Invalid session' });
-    }
-
-    // 2. Get YouTube access token from social_accounts
-    const account = await this.socialAccountRepo.findOne({ where: { user_id: userId, platform: 'youtube' } });
-    if (!account || !account.access_token) {
-      return res.status(400).json({ error: 'YouTube account not connected' });
-    }
-    const accessToken = account.access_token;
-
     try {
+      // 1. Get user from JWT cookie
+      const jwt = req.cookies['jwt'];
+      if (!jwt) {
+        console.log('No JWT cookie found');
+        return res.status(401).json({ error: 'Missing authentication token' });
+      }
+      
+      const payload = this.jwtService.decode(jwt) as any;
+      const userId = payload?.sub;
+      console.log('JWT payload:', payload);
+      console.log('User ID from JWT:', userId);
+      
+      if (!userId) {
+        console.log('No user ID found in JWT payload');
+        return res.status(401).json({ error: 'Invalid session' });
+      }
+
+      // 2. Get YouTube access token from social_accounts
+      // Convert userId to number for database query
+      const numericUserId = parseInt(userId.toString(), 10);
+      console.log('Looking for YouTube account with user ID:', numericUserId);
+      
+      const account = await this.socialAccountRepo.findOne({ 
+        where: { user_id: numericUserId, platform: 'youtube' } 
+      });
+      
+      console.log('Found YouTube account:', account ? 'Yes' : 'No');
+      
+      if (!account || !account.access_token) {
+        console.log('No YouTube account or access token found');
+        return res.status(400).json({ error: 'YouTube account not connected' });
+      }
+      
+      const accessToken = account.access_token;
+      console.log('YouTube access token found, length:', accessToken.length);
+
       // 3. Get channel info
+      console.log('Fetching YouTube channel info...');
       const channelRes = await axios.get('https://www.googleapis.com/youtube/v3/channels', {
         params: {
           part: 'snippet,contentDetails,statistics',
@@ -259,12 +278,27 @@ export class YouTubeAuthController {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const channel = channelRes.data.items[0];
+      
+      console.log('Channel API response status:', channelRes.status);
+      const channel = channelRes.data.items?.[0];
+      
       if (!channel) {
+        console.log('No channel found in API response');
         return res.status(404).json({ error: 'No channel found' });
       }
+      
+      console.log('Channel found:', channel.snippet?.title);
+
       // 4. Get recent videos (from uploads playlist)
-      const uploadsPlaylistId = channel.contentDetails.relatedPlaylists.uploads;
+      const uploadsPlaylistId = channel.contentDetails?.relatedPlaylists?.uploads;
+      console.log('Uploads playlist ID:', uploadsPlaylistId);
+      
+      if (!uploadsPlaylistId) {
+        console.log('No uploads playlist found');
+        return res.json({ channel, videos: [] });
+      }
+      
+      console.log('Fetching videos from playlist...');
       const videosRes = await axios.get('https://www.googleapis.com/youtube/v3/playlistItems', {
         params: {
           part: 'snippet,contentDetails',
@@ -275,12 +309,20 @@ export class YouTubeAuthController {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const videos = videosRes.data.items;
+      
+      console.log('Videos API response status:', videosRes.status);
+      const videos = videosRes.data.items || [];
+      console.log('Found videos:', videos.length);
+
       // 5. Return channel info and videos
       return res.json({ channel, videos });
     } catch (err: any) {
       console.error('YouTube API error:', err.response?.data || err.message);
-      return res.status(500).json({ error: 'Failed to fetch YouTube data' });
+      console.error('Error stack:', err.stack);
+      return res.status(500).json({ 
+        error: 'Failed to fetch YouTube data',
+        details: err.response?.data || err.message 
+      });
     }
   }
 } 
