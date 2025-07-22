@@ -279,6 +279,21 @@ export class AnalyticsService {
         [trackingId]
       );
 
+      // Get daily analytics data for the last 7 days
+      const dailyData = await this.dataSource.query(
+        `SELECT 
+           DATE(created_at) as date,
+           COUNT(DISTINCT ip_address) as visitors,
+           COUNT(*) as page_views
+         FROM analytics_events 
+         WHERE tracking_id = $1 
+         AND event_type = 'pageview'
+         AND created_at >= NOW() - INTERVAL '7 days'
+         GROUP BY DATE(created_at)
+         ORDER BY date`,
+        [trackingId]
+      );
+
       // Calculate return visitors (simplified - visitors with multiple sessions)
       const returnVisitors = await this.dataSource.query(
         `SELECT COUNT(DISTINCT ip_address) as count
@@ -317,7 +332,8 @@ export class AnalyticsService {
         returnVisitors: returnVisitorRate,
         clickThroughRate: clickThroughRate,
         buttonClicks: buttonClickEvents[0]?.count || 0,
-        formSubmits: formSubmitEvents[0]?.count || 0
+        formSubmits: formSubmitEvents[0]?.count || 0,
+        dailyData: dailyData // Add daily data for charts
       };
     } catch (error) {
       console.error('Error getting analytics data:', error);
