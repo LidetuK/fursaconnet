@@ -101,11 +101,19 @@ export class AnalyticsService {
     });
   });
   
-  // Initial page view
+  // Initial page view - only track once
+  let pageViewTracked = false;
+  function trackInitialPageView() {
+    if (!pageViewTracked) {
+      pageViewTracked = true;
+      trackPageView();
+    }
+  }
+  
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', trackPageView);
+    document.addEventListener('DOMContentLoaded', trackInitialPageView);
   } else {
-    trackPageView();
+    trackInitialPageView();
   }
 })();
 </script>`;
@@ -133,6 +141,17 @@ export class AnalyticsService {
         [trackingId]
       );
 
+      // Debug: Get recent events to see what's being tracked
+      const recentEvents = await this.dataSource.query(
+        `SELECT event_type, page_url, created_at, ip_address
+         FROM analytics_events 
+         WHERE tracking_id = $1 
+         ORDER BY created_at DESC 
+         LIMIT 10`,
+        [trackingId]
+      );
+      console.log('Recent events for tracking ID', trackingId, ':', recentEvents);
+
       const topPages = await this.dataSource.query(
         `SELECT page_url, COUNT(*) as views 
          FROM analytics_events 
@@ -156,24 +175,24 @@ export class AnalyticsService {
       const totalSessions = await this.dataSource.query(
         `SELECT COUNT(DISTINCT ip_address) as count 
          FROM analytics_events 
-         WHERE tracking_id = $1`,
+         WHERE tracking_id = $1 AND event_type = 'pageview'`,
         [trackingId]
       );
 
-      const multiPageSessions = await this.dataSource.query(
+      const singlePageSessions = await this.dataSource.query(
         `SELECT COUNT(DISTINCT ip_address) as count 
          FROM (
            SELECT ip_address, COUNT(*) as page_count
            FROM analytics_events 
            WHERE tracking_id = $1 AND event_type = 'pageview'
            GROUP BY ip_address
-           HAVING COUNT(*) > 1
-         ) multi_page`,
+           HAVING COUNT(*) = 1
+         ) single_page`,
         [trackingId]
       );
 
       const bounceRate = totalSessions[0]?.count > 0 
-        ? Math.round(((totalSessions[0].count - multiPageSessions[0]?.count) / totalSessions[0].count) * 100)
+        ? Math.round((singlePageSessions[0]?.count / totalSessions[0].count) * 100)
         : 0;
 
       // Calculate average session duration (simplified)
