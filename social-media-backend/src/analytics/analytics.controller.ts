@@ -15,15 +15,41 @@ export class AnalyticsController {
   @Post('generate-tracking-script')
   async generateTrackingScript(@Req() req: Request, @Res() res: Response, @Body() body: { websiteUrl: string, trackingName: string }) {
     try {
+      console.log('Analytics request received:', { body, user: (req as any).user });
+      
       const user: any = (req as any).user || {};
       const userId = user.sub;
       
       if (!userId) {
+        console.log('No user ID found');
         return res.status(401).json({ error: 'Not authenticated' });
       }
 
+      console.log('User ID:', userId);
+
       // Generate unique tracking ID
       const trackingId = this.analyticsService.generateTrackingId();
+      console.log('Generated tracking ID:', trackingId);
+      
+      // Check if table exists first
+      try {
+        const tableExists = await this.dataSource.query(
+          `SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'analytics_tracking'
+          )`
+        );
+        console.log('Table exists check:', tableExists);
+        
+        if (!tableExists[0]?.exists) {
+          console.error('analytics_tracking table does not exist');
+          return res.status(500).json({ error: 'Analytics tables not set up', details: 'Please run the analytics table creation script' });
+        }
+      } catch (tableCheckError) {
+        console.error('Error checking table existence:', tableCheckError);
+        return res.status(500).json({ error: 'Database error', details: tableCheckError.message });
+      }
       
       // Save tracking configuration to database
       await this.dataSource.query(
@@ -32,8 +58,12 @@ export class AnalyticsController {
         [userId, trackingId, body.websiteUrl, body.trackingName]
       );
 
+      console.log('Tracking configuration saved to database');
+
       // Generate the tracking script
       const trackingScript = this.analyticsService.generateTrackingScript(trackingId);
+
+      console.log('Tracking script generated successfully');
 
       return res.status(200).json({
         success: true,
