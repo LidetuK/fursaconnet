@@ -89,7 +89,10 @@ export class GoogleBusinessController {
       let businessData: any = null;
       
       try {
-        // Use the Business Profile API
+        // Use the Business Profile API (updated endpoints)
+        console.log('Attempting to fetch Google Business Profile data...');
+        
+        // First, try to get user's business accounts
         const accountsResponse = await axios.get('https://mybusinessbusinessinformation.googleapis.com/v1/accounts', {
           headers: {
             'Authorization': `Bearer ${googleAccessToken}`,
@@ -98,7 +101,7 @@ export class GoogleBusinessController {
         });
 
         console.log('Accounts API response status:', accountsResponse.status);
-        console.log('Accounts response data:', accountsResponse.data);
+        console.log('Accounts response data:', JSON.stringify(accountsResponse.data, null, 2));
 
         if (accountsResponse.data.accounts && accountsResponse.data.accounts.length > 0) {
           const account = accountsResponse.data.accounts[0];
@@ -195,20 +198,31 @@ export class GoogleBusinessController {
             throw new Error('No business locations found');
           }
         } else {
-          throw new Error('No business accounts found');
+          console.log('No business accounts found - user may not have a Google Business Profile set up');
+          throw new Error('No business accounts found. Please ensure you have a Google Business Profile set up.');
         }
       } catch (businessApiError: any) {
         console.error('Business Profile API error:', {
           status: businessApiError.response?.status,
           data: businessApiError.response?.data,
-          message: businessApiError.message
+          message: businessApiError.message,
+          error: businessApiError.response?.data?.error || businessApiError.message
         });
+        
+        // Check specific error types
+        if (businessApiError.response?.status === 403) {
+          console.error('Permission denied - Google Business Profile API not enabled or insufficient permissions');
+        } else if (businessApiError.response?.status === 401) {
+          console.error('Unauthorized - Token may be expired or invalid');
+        } else if (businessApiError.response?.status === 404) {
+          console.error('No business profile found - User may not have a Google Business Profile set up');
+        }
         
         // Fallback to mock data for now
         console.log('Falling back to mock data due to API error');
         businessData = {
-          accountName: "Premium Promospace",
-          businessName: "Premium Promospace - Digital Marketing Agency",
+          accountName: "Demo Data (Real data unavailable)",
+          businessName: "Premium Promospace - Digital Marketing Agency (Demo)",
           address: "123 Business Street, Tech City, TC 12345",
           phone: "+1 (555) 123-4567",
           website: "https://premiumpromospace.com",
@@ -336,6 +350,60 @@ export class GoogleBusinessController {
       return res.status(500).json({ 
         error: 'Failed to check connection status',
         details: err.message 
+      });
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('test-api')
+  async testGoogleBusinessAPI(@Req() req: Request, @Res() res: Response) {
+    try {
+      const user: any = (req as any).user || {};
+      const userId = user.sub;
+      
+      console.log('Testing Google Business API for user:', userId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      
+      // Get Google Business access token from database
+      const googleBusinessAccount = await this.dataSource.query(
+        'SELECT access_token, refresh_token, expires_at FROM google_business_accounts WHERE user_id = $1',
+        [userId]
+      );
+      
+      if (!googleBusinessAccount || googleBusinessAccount.length === 0) {
+        return res.status(400).json({ error: 'Google Business account not connected' });
+      }
+      
+      const account = googleBusinessAccount[0];
+      const googleAccessToken = account.access_token;
+      
+      console.log('Testing with token:', googleAccessToken.substring(0, 20) + '...');
+      
+      // Test the API endpoint
+      const response = await axios.get('https://mybusinessbusinessinformation.googleapis.com/v1/accounts', {
+        headers: {
+          'Authorization': `Bearer ${googleAccessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      return res.json({
+        success: true,
+        status: response.status,
+        data: response.data,
+        message: 'API test successful'
+      });
+      
+    } catch (err: any) {
+      console.error('API test error:', err.response?.data || err.message);
+      return res.status(500).json({
+        success: false,
+        error: 'API test failed',
+        details: err.response?.data || err.message,
+        status: err.response?.status
       });
     }
   }
