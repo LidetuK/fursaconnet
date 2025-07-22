@@ -143,8 +143,61 @@ export class AnalyticsService {
         [trackingId]
       );
 
+      // Calculate active users (visitors in last 30 minutes)
+      const activeUsers = await this.dataSource.query(
+        `SELECT COUNT(DISTINCT ip_address) as count 
+         FROM analytics_events 
+         WHERE tracking_id = $1 
+         AND created_at >= NOW() - INTERVAL '30 minutes'`,
+        [trackingId]
+      );
+
+      // Calculate bounce rate (single page sessions)
+      const totalSessions = await this.dataSource.query(
+        `SELECT COUNT(DISTINCT ip_address) as count 
+         FROM analytics_events 
+         WHERE tracking_id = $1`,
+        [trackingId]
+      );
+
+      const multiPageSessions = await this.dataSource.query(
+        `SELECT COUNT(DISTINCT ip_address) as count 
+         FROM (
+           SELECT ip_address, COUNT(*) as page_count
+           FROM analytics_events 
+           WHERE tracking_id = $1 AND event_type = 'pageview'
+           GROUP BY ip_address
+           HAVING COUNT(*) > 1
+         ) multi_page`,
+        [trackingId]
+      );
+
+      const bounceRate = totalSessions[0]?.count > 0 
+        ? Math.round(((totalSessions[0].count - multiPageSessions[0]?.count) / totalSessions[0].count) * 100)
+        : 0;
+
+      // Calculate average session duration (simplified)
+      const avgSessionDuration = await this.dataSource.query(
+        `SELECT AVG(duration) as avg_duration 
+         FROM (
+           SELECT ip_address, 
+                  EXTRACT(EPOCH FROM (MAX(created_at) - MIN(created_at))) as duration
+           FROM analytics_events 
+           WHERE tracking_id = $1
+           GROUP BY ip_address
+         ) sessions`,
+        [trackingId]
+      );
+
       return {
-        pageViews: pageViews[0]?.count || 0,
+        totalPageViews: pageViews[0]?.count || 0,
+        activeUsers: activeUsers[0]?.count || 0,
+        bounceRate: bounceRate,
+        avgSessionDuration: Math.round(avgSessionDuration[0]?.avg_duration || 0),
+        pageViewsGrowth: 0, // Placeholder for now
+        activeUsersGrowth: 0, // Placeholder for now
+        bounceRateChange: 0, // Placeholder for now
+        sessionDurationGrowth: 0, // Placeholder for now
         uniqueVisitors: uniqueVisitors[0]?.count || 0,
         recentActivity,
         topPages
