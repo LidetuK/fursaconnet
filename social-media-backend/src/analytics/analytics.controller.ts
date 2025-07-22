@@ -13,13 +13,13 @@ export class AnalyticsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('generate-tracking-script')
-  async generateTrackingScript(@Req() req: Request, @Body() body: { websiteUrl: string, trackingName: string }) {
+  async generateTrackingScript(@Req() req: Request, @Res() res: Response, @Body() body: { websiteUrl: string, trackingName: string }) {
     try {
       const user: any = (req as any).user || {};
       const userId = user.sub;
       
       if (!userId) {
-        return { error: 'Not authenticated' };
+        return res.status(401).json({ error: 'Not authenticated' });
       }
 
       // Generate unique tracking ID
@@ -35,15 +35,15 @@ export class AnalyticsController {
       // Generate the tracking script
       const trackingScript = this.analyticsService.generateTrackingScript(trackingId);
 
-      return {
+      return res.status(200).json({
         success: true,
         trackingId,
         trackingScript,
         message: 'Tracking script generated successfully'
-      };
+      });
     } catch (err: any) {
       console.error('Error generating tracking script:', err);
-      return { error: 'Failed to generate tracking script', details: err.message };
+      return res.status(500).json({ error: 'Failed to generate tracking script', details: err.message });
     }
   }
 
