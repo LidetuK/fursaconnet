@@ -16,10 +16,16 @@ export class AnalyticsService {
     return `<!-- Premium Promospace Analytics Tracking Script -->
 <script>
 (function() {
+  // Prevent multiple script executions
+  if (window.PremiumAnalytics && window.PremiumAnalytics.initialized) {
+    return;
+  }
+  
   // Initialize analytics
   window.PremiumAnalytics = window.PremiumAnalytics || {};
   window.PremiumAnalytics.trackingId = '${trackingId}';
   window.PremiumAnalytics.endpoint = 'https://premium-promospace-production.up.railway.app/analytics/track/${trackingId}';
+  window.PremiumAnalytics.initialized = true;
   
   // Track page view
   function trackPageView() {
@@ -110,10 +116,12 @@ export class AnalyticsService {
     }
   }
   
+  // Use a more reliable method to track initial page view
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', trackInitialPageView);
+    document.addEventListener('DOMContentLoaded', trackInitialPageView, { once: true });
   } else {
-    trackInitialPageView();
+    // If DOM is already loaded, track immediately but only once
+    setTimeout(trackInitialPageView, 0);
   }
 })();
 </script>`;
@@ -224,6 +232,17 @@ export class AnalyticsService {
         singlePageSessions: singlePageSessions[0]?.count,
         calculatedBounceRate: bounceRate
       });
+
+      // Additional debug: Check if there are any non-pageview events affecting the calculation
+      const allEventsPerIP = await this.dataSource.query(
+        `SELECT ip_address, event_type, COUNT(*) as event_count
+         FROM analytics_events 
+         WHERE tracking_id = $1
+         GROUP BY ip_address, event_type
+         ORDER BY ip_address, event_type`,
+        [trackingId]
+      );
+      console.log('All events per IP for tracking ID', trackingId, ':', allEventsPerIP);
 
       // Calculate average session duration (simplified)
       const avgSessionDuration = await this.dataSource.query(
