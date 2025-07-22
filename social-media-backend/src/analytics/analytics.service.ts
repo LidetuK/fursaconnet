@@ -232,7 +232,12 @@ export class AnalyticsService {
   }
 
   private generateRecommendations(basicMetrics: any, conversions: any[]) {
-    const recommendations = [];
+    const recommendations: Array<{
+      type: string;
+      title: string;
+      description: string;
+      priority: string;
+    }> = [];
 
     // Page views recommendation
     if (basicMetrics.pageViews > 0) {
