@@ -26,6 +26,7 @@ import { InstagramAuthService } from './instagram-auth/instagram-auth.service';
 import { ExpertsModule } from './experts/experts.module';
 import { PostsController } from './posts/posts.controller';
 import { GoogleBusinessController } from './google-business/google-business.controller';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { GoogleBusinessController } from './google-business/google-business.cont
     TypeOrmModule.forFeature([SMES, SocialAccount, Post]),
     AuthModule,
     ExpertsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController, GoogleAuthController, LinkedInAuthController, UsersController, TwitterOAuth2Controller, GoogleAdsController, YouTubeAuthController, TelegramAuthController, FacebookAuthController, InstagramAuthController, PostsController, GoogleBusinessController],
   providers: [AppService, GoogleAuthService, LinkedInAuthService, TelegramAuthService, FacebookAuthService, InstagramAuthService],

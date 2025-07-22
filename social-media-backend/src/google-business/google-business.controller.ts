@@ -216,12 +216,14 @@ export class GoogleBusinessController {
           console.error('Unauthorized - Token may be expired or invalid');
         } else if (businessApiError.response?.status === 404) {
           console.error('No business profile found - User may not have a Google Business Profile set up');
+        } else if (businessApiError.response?.status === 429) {
+          console.error('Quota exceeded - Google Business Profile API quota limit reached. Please enable the API and request quota increase.');
         }
         
         // Fallback to mock data for now
         console.log('Falling back to mock data due to API error');
         businessData = {
-          accountName: "Demo Data (Real data unavailable)",
+          accountName: "Demo Data (API Quota Exceeded)",
           businessName: "Premium Promospace - Digital Marketing Agency (Demo)",
           address: "123 Business Street, Tech City, TC 12345",
           phone: "+1 (555) 123-4567",
