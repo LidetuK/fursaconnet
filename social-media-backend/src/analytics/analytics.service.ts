@@ -257,6 +257,50 @@ export class AnalyticsService {
         [trackingId]
       );
 
+      // Calculate additional engagement metrics
+      const scrollDepthEvents = await this.dataSource.query(
+        `SELECT AVG(CAST(event_data->>'depth' AS INTEGER)) as avg_depth
+         FROM analytics_events 
+         WHERE tracking_id = $1 AND event_type = 'scroll_depth'`,
+        [trackingId]
+      );
+
+      const buttonClickEvents = await this.dataSource.query(
+        `SELECT COUNT(*) as count
+         FROM analytics_events 
+         WHERE tracking_id = $1 AND event_type = 'button_click'`,
+        [trackingId]
+      );
+
+      const formSubmitEvents = await this.dataSource.query(
+        `SELECT COUNT(*) as count
+         FROM analytics_events 
+         WHERE tracking_id = $1 AND event_type = 'form_submit'`,
+        [trackingId]
+      );
+
+      // Calculate return visitors (simplified - visitors with multiple sessions)
+      const returnVisitors = await this.dataSource.query(
+        `SELECT COUNT(DISTINCT ip_address) as count
+         FROM (
+           SELECT ip_address, COUNT(DISTINCT DATE(created_at)) as session_days
+           FROM analytics_events 
+           WHERE tracking_id = $1
+           GROUP BY ip_address
+           HAVING COUNT(DISTINCT DATE(created_at)) > 1
+         ) multi_day_visitors`,
+        [trackingId]
+      );
+
+      const returnVisitorRate = uniqueVisitors[0]?.count > 0 
+        ? Math.round((returnVisitors[0]?.count / uniqueVisitors[0].count) * 100)
+        : 0;
+
+      // Calculate click-through rate
+      const clickThroughRate = pageViews[0]?.count > 0 
+        ? Math.round((buttonClickEvents[0]?.count / pageViews[0].count) * 100)
+        : 0;
+
       return {
         totalPageViews: pageViews[0]?.count || 0,
         activeUsers: activeUsers[0]?.count || 0,
@@ -268,7 +312,12 @@ export class AnalyticsService {
         sessionDurationGrowth: 0, // Placeholder for now
         uniqueVisitors: uniqueVisitors[0]?.count || 0,
         recentActivity,
-        topPages
+        topPages,
+        scrollDepth: Math.round(scrollDepthEvents[0]?.avg_depth || 0),
+        returnVisitors: returnVisitorRate,
+        clickThroughRate: clickThroughRate,
+        buttonClicks: buttonClickEvents[0]?.count || 0,
+        formSubmits: formSubmitEvents[0]?.count || 0
       };
     } catch (error) {
       console.error('Error getting analytics data:', error);
