@@ -292,24 +292,30 @@ export class GoogleBusinessController {
   @UseGuards(JwtAuthGuard)
   @Get('connection-status')
   async getConnectionStatus(@Req() req: Request, @Res() res: Response) {
-    const user: any = (req as any).user || {};
-    const userId = user.sub;
-    
-    console.log('Checking Google Business connection status for user:', userId);
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
     try {
+      const user: any = (req as any).user || {};
+      const userId = user.sub;
+      
+      console.log('Checking Google Business connection status for user:', userId);
+      
+      if (!userId) {
+        console.log('No user ID found in request');
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+      
+      // Check if user has Google Business connection in database
       const googleBusinessAccount = await this.dataSource.query(
         'SELECT id, created_at, expires_at FROM google_business_accounts WHERE user_id = $1',
         [userId]
       );
       
+      console.log('Database query result:', googleBusinessAccount);
+      
       if (googleBusinessAccount && googleBusinessAccount.length > 0) {
         const account = googleBusinessAccount[0];
         const isExpired = account.expires_at && new Date(account.expires_at) < new Date();
+        
+        console.log('Google Business connected:', { connectedAt: account.created_at, isExpired });
         
         return res.json({
           connected: true,
@@ -317,6 +323,7 @@ export class GoogleBusinessController {
           isExpired: isExpired
         });
       } else {
+        console.log('No Google Business connection found for user:', userId);
         return res.json({
           connected: false,
           connectedAt: null,
@@ -325,7 +332,11 @@ export class GoogleBusinessController {
       }
     } catch (err: any) {
       console.error('Error checking Google Business connection status:', err);
-      return res.status(500).json({ error: 'Failed to check connection status' });
+      console.error('Error stack:', err.stack);
+      return res.status(500).json({ 
+        error: 'Failed to check connection status',
+        details: err.message 
+      });
     }
   }
 } 
