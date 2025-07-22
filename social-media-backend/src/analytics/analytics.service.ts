@@ -152,6 +152,27 @@ export class AnalyticsService {
       );
       console.log('Recent events for tracking ID', trackingId, ':', recentEvents);
 
+      // Debug: Check all event types for this tracking ID
+      const eventTypes = await this.dataSource.query(
+        `SELECT event_type, COUNT(*) as count
+         FROM analytics_events 
+         WHERE tracking_id = $1 
+         GROUP BY event_type`,
+        [trackingId]
+      );
+      console.log('Event types for tracking ID', trackingId, ':', eventTypes);
+
+      // Debug: Check page views per IP to see if double tracking is still happening
+      const pageViewsPerIP = await this.dataSource.query(
+        `SELECT ip_address, COUNT(*) as page_views
+         FROM analytics_events 
+         WHERE tracking_id = $1 AND event_type = 'pageview'
+         GROUP BY ip_address
+         ORDER BY page_views DESC`,
+        [trackingId]
+      );
+      console.log('Page views per IP for tracking ID', trackingId, ':', pageViewsPerIP);
+
       const topPages = await this.dataSource.query(
         `SELECT page_url, COUNT(*) as views 
          FROM analytics_events 
@@ -172,6 +193,7 @@ export class AnalyticsService {
       );
 
       // Calculate bounce rate (single page sessions)
+      // Only consider pageview events for bounce rate calculation
       const totalSessions = await this.dataSource.query(
         `SELECT COUNT(DISTINCT ip_address) as count 
          FROM analytics_events 
@@ -194,6 +216,14 @@ export class AnalyticsService {
       const bounceRate = totalSessions[0]?.count > 0 
         ? Math.round((singlePageSessions[0]?.count / totalSessions[0].count) * 100)
         : 0;
+
+      // Debug bounce rate calculation
+      console.log('Bounce Rate Debug:', {
+        trackingId,
+        totalSessions: totalSessions[0]?.count,
+        singlePageSessions: singlePageSessions[0]?.count,
+        calculatedBounceRate: bounceRate
+      });
 
       // Calculate average session duration (simplified)
       const avgSessionDuration = await this.dataSource.query(
