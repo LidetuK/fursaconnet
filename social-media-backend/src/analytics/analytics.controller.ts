@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, UseGuards, Req, Res } from '@nestjs
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { DataSource } from 'typeorm';
-import { AnalyticsService } from './analytics.service';
+import { AnalyticsService, Recommendation } from './analytics.service';
 
 @Controller('analytics')
 export class AnalyticsController {

@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+export interface Recommendation {
+  type: string;
+  title: string;
+  description: string;
+  priority: string;
+}
+
 @Injectable()
 export class AnalyticsService {
   constructor(private readonly dataSource: DataSource) {}
@@ -418,19 +425,14 @@ export class AnalyticsService {
   }
 
   private generateRecommendations(basicMetrics: any, conversions: any[]) {
-    const recommendations: Array<{
-      type: string;
-      title: string;
-      description: string;
-      priority: string;
-    }> = [];
+    const recommendations: Recommendation[] = [];
 
     // Page views recommendation
-    if (basicMetrics.pageViews > 0) {
+    if (basicMetrics.totalPageViews > 0) {
       recommendations.push({
         type: 'page_views',
         title: 'Page Views Analysis',
-        description: `Your website has ${basicMetrics.pageViews} total page views. Consider implementing A/B testing to improve conversion rates.`,
+        description: `Your website has ${basicMetrics.totalPageViews} total page views. Consider implementing A/B testing to improve conversion rates.`,
         priority: 'medium'
       });
     }
@@ -447,7 +449,7 @@ export class AnalyticsService {
     }
 
     // User engagement recommendation
-    if (basicMetrics.uniqueVisitors > 0 && basicMetrics.pageViews / basicMetrics.uniqueVisitors < 2) {
+    if (basicMetrics.uniqueVisitors > 0 && basicMetrics.totalPageViews / basicMetrics.uniqueVisitors < 2) {
       recommendations.push({
         type: 'engagement',
         title: 'Improve User Engagement',
