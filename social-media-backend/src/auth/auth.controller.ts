@@ -16,6 +16,11 @@ export class AuthController {
     @InjectDataSource() private dataSource: DataSource
   ) {}
 
+  @Get('health')
+  getHealth() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+
   @Post('login')
   async login(@Body() body: { email: string; password: string }, @Res() res: Response) {
     console.log('=== LOGIN ATTEMPT START ===');
