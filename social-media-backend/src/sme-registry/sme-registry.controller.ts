@@ -1,4 +1,4 @@
-import { Controller, Post, Body, BadRequestException, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Get, Delete, Param, Patch } from '@nestjs/common';
 import { SMERegistryService } from './sme-registry.service';
 
 @Controller('sme_registry')
@@ -20,8 +20,8 @@ export class SMERegistryController {
       };
       
       console.log('Processed SME data:', smeData);
-      await this.smeRegistryService.createSME(smeData);
-      return { success: true, message: 'SME registered successfully' };
+      const result = await this.smeRegistryService.createSME(smeData);
+      return { success: true, message: 'SME registered successfully', id: result.id };
     } catch (error) {
       console.error('Error creating SME:', error);
       throw new BadRequestException('Failed to create SME: ' + error.message);
@@ -36,6 +36,21 @@ export class SMERegistryController {
     } catch (error) {
       console.error('Error fetching SMEs:', error);
       throw new BadRequestException('Failed to fetch SMEs');
+    }
+  }
+
+  @Patch(':id')
+  async updateSME(
+    @Param('id') id: number,
+    @Body() body: Record<string, any>
+  ) {
+    try {
+      console.log(`Updating SME ${id} with:`, body);
+      await this.smeRegistryService.updateSME(id, body);
+      return { success: true, message: 'SME updated successfully' };
+    } catch (error) {
+      console.error('Error updating SME:', error);
+      throw new BadRequestException('Failed to update SME: ' + error.message);
     }
   }
 
