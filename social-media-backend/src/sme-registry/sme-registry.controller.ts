@@ -14,9 +14,9 @@ export class SMERegistryController {
       
       const smeData = {
         name: body.name,
-        companyName: body.companyName,
-        phoneNumber: body.phoneNumber,
-        companyLogoUrl: body.companyLogoUrl || null,
+        companyName: body.company_name,
+        phoneNumber: body.phone_number,
+        companyLogoUrl: body.company_logo_url || null,
       };
       
       console.log('Processed SME data:', smeData);
