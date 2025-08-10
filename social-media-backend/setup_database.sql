@@ -43,6 +43,16 @@ CREATE TABLE IF NOT EXISTS "experts" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create sme_registry table
+CREATE TABLE IF NOT EXISTS "sme_registry" (
+    "id" SERIAL PRIMARY KEY,
+    "name" VARCHAR(100) NOT NULL,
+    "company_name" VARCHAR(255) NOT NULL,
+    "phone_number" VARCHAR(20) NOT NULL,
+    "company_logo_url" TEXT,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS "IDX_user_email" ON "user"("email");
 CREATE INDEX IF NOT EXISTS "IDX_social_accounts_user_id" ON "social_accounts"("user_id");

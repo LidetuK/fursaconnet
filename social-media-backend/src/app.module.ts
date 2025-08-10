@@ -24,6 +24,7 @@ import { FacebookAuthService } from './facebook-auth/facebook-auth.service';
 import { InstagramAuthController } from './instagram-auth/instagram-auth.controller';
 import { InstagramAuthService } from './instagram-auth/instagram-auth.service';
 import { ExpertsModule } from './experts/experts.module';
+import { SMERegistryModule } from './sme-registry/sme-registry.module';
 import { PostsController } from './posts/posts.controller';
 import { GoogleBusinessController } from './google-business/google-business.controller';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -56,6 +57,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     TypeOrmModule.forFeature([SMES, SocialAccount, Post]),
     AuthModule,
     ExpertsModule,
+    SMERegistryModule,
     AnalyticsModule,
   ],
   controllers: [AppController, GoogleAuthController, LinkedInAuthController, UsersController, TwitterOAuth2Controller, GoogleAdsController, YouTubeAuthController, TelegramAuthController, FacebookAuthController, InstagramAuthController, PostsController, GoogleBusinessController],
