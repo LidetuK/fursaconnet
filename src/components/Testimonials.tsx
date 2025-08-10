@@ -1,3 +1,4 @@
+import React from "react";
 import { useRef, useEffect } from "react";
 import { Video, Youtube } from "lucide-react";
 
@@ -46,7 +47,7 @@ const Testimonials = () => {
             <div className="aspect-video w-full">
               <video
                 ref={videoRef}
-                src="/test.mp4"
+                src="https://res.cloudinary.com/dkzw06zke/video/upload/v1754824051/0708_1_bj0umt.mp4"
                 height={570}
                 width="100%"
                 controls
