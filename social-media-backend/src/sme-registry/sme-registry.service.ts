@@ -30,7 +30,7 @@ export class SMERegistryService {
 
   async updateSME(id: number, data: Record<string, any>) {
     const updateFields: string[] = [];
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     let paramIndex = 1;
 
     // Build dynamic update query
