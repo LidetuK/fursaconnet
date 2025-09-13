@@ -46,7 +46,7 @@ const steps = [
       'Regular progress updates'
     ],
     color: 'bg-[#D4EDDA]',
-    iconColor: 'text-[#28A745]'
+    iconColor: 'text-[#F97415]'
   },
   {
     id: 4,

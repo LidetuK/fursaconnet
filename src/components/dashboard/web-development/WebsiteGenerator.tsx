@@ -654,7 +654,7 @@ console.log('Website loaded successfully!');`;
 const extractColors = (prompt: string): { primary: string; secondary: string; accent: string } => {
   const colorKeywords = {
     blue: { primary: '#2563eb', secondary: '#3b82f6', accent: '#1e40af' },
-    green: { primary: '#16a34a', secondary: '#22c55e', accent: '#15803d' },
+    green: { primary: '#F97415', secondary: '#FB8B3D', accent: '#E65A0A' },
     purple: { primary: '#9333ea', secondary: '#a855f7', accent: '#7c3aed' },
     red: { primary: '#dc2626', secondary: '#ef4444', accent: '#b91c1c' },
     orange: { primary: '#ea580c', secondary: '#f97316', accent: '#c2410c' },

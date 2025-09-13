@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 20%;
     
-    --primary: 174 75% 29%; /* #0B9581 */
+    --primary: 25 100% 56%; /* #F97415 */
     --primary-foreground: 0 0% 100%;
     
     --secondary: 0 0% 96%; /* #F5F5F5 */
@@ -78,11 +78,11 @@
   }
 
   .text-brand-primary {
-    color: #00855A;
+    color: #F97415;
   }
 
   .bg-brand-primary {
-    background-color: #00855A;
+    background-color: #F97415;
   }
 }
 

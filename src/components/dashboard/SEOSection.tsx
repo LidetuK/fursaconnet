@@ -429,7 +429,7 @@ const SEOSection = ({ packageType }: SEOSectionProps) => {
                             className="bg-white rounded border-l-4 border-solid shadow-sm overflow-hidden"
                             style={{ 
                               borderLeftColor: issue.severity === "high" ? "#ef4444" : 
-                                              issue.severity === "medium" ? "#f59e0b" : "#22c55e" 
+                                              issue.severity === "medium" ? "#f59e0b" : "#F97415" 
                             }}
                           >
                             <div className="p-3 border-b border-gray-100">
