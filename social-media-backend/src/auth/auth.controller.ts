@@ -28,162 +28,67 @@ export class AuthController {
     console.log('Request headers:', res.req.headers);
     console.log('Request cookies:', res.req.cookies);
     
-    // First try to find user in admin_users table (by username)
-    let user = await this.dataSource.query(
-      'SELECT * FROM admin_users WHERE username = $1',
-      [body.email]
-    );
-    console.log('Admin user search result:', user);
+    try {
+      // Try to find user in smes table (by email)
+      const user = await this.dataSource.query(
+        'SELECT * FROM smes WHERE email = $1',
+        [body.email]
+      );
+      console.log('SME user search result:', user);
 
-    if (user[0]) {
-      // Admin user found
-      console.log('Admin user found, checking password...');
-    const valid = await bcrypt.compare(body.password, user[0].password_hash);
-      console.log('Password valid:', valid);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
-      
-      const payload = { 
-        sub: user[0].id, 
-        username: user[0].username, 
-        is_admin: user[0].is_admin 
-      };
-      console.log('Admin user JWT payload:', payload);
-      
-      const token = this.jwtService.sign(payload);
-      console.log('Admin user JWT token generated:', token ? 'Yes' : 'No');
-      
-      // Set JWT cookie
-      const cookieOptions = {
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let the browser set the domain automatically
-      };
-      
-      console.log('Setting JWT cookie with options:', cookieOptions);
-      res.cookie('jwt', token, cookieOptions);
-      console.log('JWT cookie set successfully');
-      
-      const response = {
-      access_token: token,
-        user: { 
-          id: user[0].id, 
-          username: user[0].username, 
-          is_admin: user[0].is_admin 
-        }
-      };
-      console.log('Sending admin user response:', response);
-      console.log('=== LOGIN ATTEMPT END (ADMIN) ===');
-      return res.json(response);
-    }
-
-    // If not found in admin_users, try regular users table (by email)
-    user = await this.dataSource.query(
-      'SELECT * FROM users WHERE email = $1',
-      [body.email]
-    );
-    console.log('Regular user search result:', user);
-
-    if (user[0]) {
-      // Regular user found
-      console.log('Regular user found, checking password...');
-      const valid = await bcrypt.compare(body.password, user[0].password_hash);
-      console.log('Password valid:', valid);
-      if (!valid) throw new UnauthorizedException('Invalid credentials');
-      
-      const payload = { 
-        sub: user[0].id, 
-        email: user[0].email,
-        name: user[0].name,
-        is_admin: false 
-      };
-      console.log('Regular user JWT payload:', payload);
-      
-      const token = this.jwtService.sign(payload);
-      console.log('Regular user JWT token generated:', token ? 'Yes' : 'No');
-      
-      // Set JWT cookie
-      const cookieOptions = {
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let the browser set the domain automatically
-      };
-      
-      console.log('Setting JWT cookie with options:', cookieOptions);
-      res.cookie('jwt', token, cookieOptions);
-      console.log('JWT cookie set successfully');
-      
-      const response = {
-        access_token: token,
-        user: { 
-          id: user[0].id, 
-          email: user[0].email,
-          name: user[0].name,
-          is_admin: false 
-        }
-      };
-      console.log('Sending regular user response:', response);
-      console.log('=== LOGIN ATTEMPT END (REGULAR) ===');
-      return res.json(response);
-    }
-
-    // If not found in users, try smes table (by email)
-    user = await this.dataSource.query(
-      'SELECT * FROM smes WHERE email = $1',
-      [body.email]
-    );
-    console.log('SME user search result:', user);
-
-    if (user[0]) {
-      // SME user found
-      console.log('SME user found, checking password...');
-      const valid = await bcrypt.compare(body.password, user[0].password);
-      console.log('Password valid:', valid);
-      if (!valid) throw new UnauthorizedException('Invalid credentials');
-      
-      const payload = { 
-        sub: user[0].id, 
-        email: user[0].email,
-        company_name: user[0].company_name,
-        is_sme: true 
-      };
-      console.log('SME user JWT payload:', payload);
-      
-      const token = this.jwtService.sign(payload);
-      console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
-      
-      // Set JWT cookie
-      const cookieOptions = {
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let the browser set the domain automatically
-      };
-      
-      console.log('Setting JWT cookie with options:', cookieOptions);
-      res.cookie('jwt', token, cookieOptions);
-      console.log('JWT cookie set successfully');
-      
-      const response = {
-        access_token: token,
-        user: { 
-          id: user[0].id, 
+      if (user[0]) {
+        // SME user found
+        console.log('SME user found, checking password...');
+        const valid = await bcrypt.compare(body.password, user[0].password);
+        console.log('Password valid:', valid);
+        if (!valid) throw new UnauthorizedException('Invalid credentials');
+        
+        const payload = { 
+          sub: user[0].id, 
           email: user[0].email,
           company_name: user[0].company_name,
+          is_admin: false,
           is_sme: true 
-        }
-      };
-      console.log('Sending SME response:', response);
-      console.log('=== LOGIN ATTEMPT END (SME) ===');
-      return res.json(response);
-    }
+        };
+        console.log('SME user JWT payload:', payload);
+        
+        const token = this.jwtService.sign(payload);
+        console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
+        
+        // Set JWT cookie
+        const cookieOptions = {
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax' as const,
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let the browser set the domain automatically
+        };
+        
+        console.log('Setting JWT cookie with options:', cookieOptions);
+        res.cookie('jwt', token, cookieOptions);
+        console.log('JWT cookie set successfully');
+        
+        const response = {
+          access_token: token,
+          user: { 
+            id: user[0].id, 
+            email: user[0].email,
+            company_name: user[0].company_name,
+            is_admin: false,
+            is_sme: true 
+          }
+        };
+        console.log('Sending SME response:', response);
+        console.log('=== LOGIN ATTEMPT END (SME) ===');
+        return res.json(response);
+      }
 
-    console.log('=== LOGIN ATTEMPT END (FAILED - NO USER FOUND) ===');
-    throw new UnauthorizedException('Invalid credentials');
+      console.log('=== LOGIN ATTEMPT END (FAILED - NO USER FOUND) ===');
+      throw new UnauthorizedException('Invalid credentials');
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   }
 
   @Post('register-sme')

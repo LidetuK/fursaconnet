@@ -53,8 +53,24 @@ CREATE TABLE IF NOT EXISTS "sme_registry" (
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create smes table for SME authentication
+CREATE TABLE IF NOT EXISTS "smes" (
+    "id" SERIAL PRIMARY KEY,
+    "email" VARCHAR UNIQUE NOT NULL,
+    "company_name" VARCHAR NOT NULL,
+    "password" VARCHAR NOT NULL,
+    "company_logo" VARCHAR,
+    "linkedinAccessToken" VARCHAR,
+    "linkedinRefreshToken" VARCHAR,
+    "linkedinTokenExpiresAt" BIGINT,
+    "linkedinUserId" VARCHAR,
+    "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS "IDX_user_email" ON "user"("email");
 CREATE INDEX IF NOT EXISTS "IDX_social_accounts_user_id" ON "social_accounts"("user_id");
 CREATE INDEX IF NOT EXISTS "IDX_social_accounts_platform" ON "social_accounts"("platform");
-CREATE INDEX IF NOT EXISTS "IDX_experts_email" ON "experts"("email"); 
+CREATE INDEX IF NOT EXISTS "IDX_experts_email" ON "experts"("email");
+CREATE INDEX IF NOT EXISTS "IDX_smes_email" ON "smes"("email"); 

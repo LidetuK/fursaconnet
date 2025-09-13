@@ -5,10 +5,13 @@ builder = "nixpacks"
 startCommand = "npm run start:prod"
 healthcheckPath = "/health"
 healthcheckTimeout = 600
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
 
 [deploy.envs]
 NIXPACKS_NODE_VERSION = "20"
 NIXPACKS_NODE_PACKAGE_MANAGER = "npm"
+NODE_ENV = "production"
 
 # Add build step
 [build.steps]
