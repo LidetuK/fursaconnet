@@ -61,7 +61,7 @@ export class AuthController {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax' as const,
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let the browser set the domain automatically
+          domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined // Set domain for Railway
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
