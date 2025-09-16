@@ -58,10 +58,10 @@ export class AuthController {
         // Set JWT cookie
         const cookieOptions = {
           httpOnly: true, 
-          secure: process.env.NODE_ENV === 'production',
+          secure: false, // Always false for local development
           sameSite: 'lax' as const,
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined // No domain for local development
+          domain: undefined // No domain restriction for local development
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
