@@ -55,11 +55,11 @@ export class AuthController {
         const token = this.jwtService.sign(payload);
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
-        // Set JWT cookie - simplified for cross-domain compatibility
+        // Set JWT cookie - most permissive settings for debugging
         const cookieOptions = {
-          httpOnly: true, 
+          httpOnly: false, // Allow JavaScript access for debugging
           secure: false, // Always false for now to avoid HTTPS issues
-          sameSite: 'lax' as const,
+          sameSite: 'none' as const, // Most permissive
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
           // No domain restriction - let browser handle it
         };
