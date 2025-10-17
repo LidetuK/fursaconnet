@@ -97,16 +97,13 @@ export class AuthController {
         const token = this.jwtService.sign(payload);
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
-        // Set JWT cookie - corrected settings for browser compatibility
-        const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
-        const isLocalhost = frontendDomain.includes('localhost');
-        
+        // Set JWT cookie - set for Railway domain so frontend can access it
         const cookieOptions = {
           httpOnly: false, // Allow JavaScript access for debugging
           secure: false, // Always false for now to avoid HTTPS issues
           sameSite: 'lax' as const, // Compatible with secure: false
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          domain: isLocalhost ? 'localhost' : undefined, // Set domain for localhost
+          // No domain restriction - will be set for Railway domain
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
