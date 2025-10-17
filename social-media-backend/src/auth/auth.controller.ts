@@ -56,12 +56,16 @@ export class AuthController {
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
         // Set JWT cookie
+        const isProduction = process.env.NODE_ENV === 'production';
+        const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+        const isLocalhost = frontendDomain.includes('localhost');
+        
         const cookieOptions = {
           httpOnly: true, 
-          secure: false, // Always false for local development
+          secure: isProduction && !isLocalhost, // true in production, false in localhost
           sameSite: 'lax' as const,
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          domain: undefined // No domain restriction for local development
+          domain: isLocalhost ? undefined : '.railway.app' // No domain restriction for localhost
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
