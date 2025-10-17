@@ -24,18 +24,29 @@ export class AuthController {
   @Get('test-cookie')
   testCookie(@Res() res: Response) {
     console.log('=== TEST COOKIE ENDPOINT ===');
+    const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+    const isLocalhost = frontendDomain.includes('localhost');
+    
     const cookieOptions = {
       httpOnly: false,
       secure: false,
-      sameSite: 'lax' as const, // Changed from 'none' to 'lax'
+      sameSite: 'lax' as const,
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      domain: isLocalhost ? 'localhost' : undefined,
     };
     
+    console.log('Frontend domain:', frontendDomain);
+    console.log('Is localhost:', isLocalhost);
     console.log('Setting test cookie with options:', cookieOptions);
     res.cookie('test_cookie', 'test_value_123', cookieOptions);
     console.log('Test cookie set successfully');
     
-    return res.json({ message: 'Test cookie set', cookieOptions });
+    return res.json({ 
+      message: 'Test cookie set', 
+      cookieOptions,
+      frontendDomain,
+      isLocalhost
+    });
   }
 
   @Post('login')
