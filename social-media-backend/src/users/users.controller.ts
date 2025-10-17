@@ -28,8 +28,8 @@ export class UsersController {
     }
     
     try {
-      // Convert userId to string format for database query
-      const userId = userJwt.sub.toString();
+      // Convert userId to number format for database query (user_id is INTEGER in database)
+      const userId = parseInt(userJwt.sub.toString(), 10);
       console.log('Querying social accounts for user ID:', userId);
       
       // Fetch all social accounts for the user

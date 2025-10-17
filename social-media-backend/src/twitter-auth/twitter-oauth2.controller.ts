@@ -137,6 +137,7 @@ export class TwitterOAuth2Controller {
       
       // Get user ID from JWT
       const jwt = req.cookies['jwt'];
+      console.log('JWT cookie in Twitter callback:', jwt ? 'Present' : 'Missing');
       if (!jwt) {
         console.error('Missing JWT cookie in Twitter callback');
         const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
@@ -144,6 +145,7 @@ export class TwitterOAuth2Controller {
       }
       
       const payload = this.jwtService.decode(jwt) as any;
+      console.log('JWT payload in Twitter callback:', payload);
       const userId = payload?.sub;
       if (!userId) {
         console.error('Invalid JWT payload in Twitter callback');
@@ -155,15 +157,25 @@ export class TwitterOAuth2Controller {
       const userIdNumber = parseInt(userId.toString(), 10);
       console.log('Saving Twitter tokens for user ID:', userIdNumber);
       
-      await this.socialAccountRepo.upsert({
+      const socialAccountData = {
         user_id: userIdNumber,
         platform: 'twitter',
         access_token: tokenRes.data.access_token,
         refresh_token: tokenRes.data.refresh_token,
         expires_at: tokenRes.data.expires_in ? new Date(Date.now() + tokenRes.data.expires_in * 1000) : undefined,
-      }, ['user_id', 'platform']);
+      };
       
-      console.log('Twitter tokens stored in database');
+      console.log('Social account data to save:', {
+        user_id: socialAccountData.user_id,
+        platform: socialAccountData.platform,
+        has_access_token: !!socialAccountData.access_token,
+        has_refresh_token: !!socialAccountData.refresh_token,
+        expires_at: socialAccountData.expires_at
+      });
+      
+      await this.socialAccountRepo.upsert(socialAccountData, ['user_id', 'platform']);
+      
+      console.log('Twitter tokens stored in database successfully');
       
       // Clean up
       res.clearCookie('twitter_code_verifier');
