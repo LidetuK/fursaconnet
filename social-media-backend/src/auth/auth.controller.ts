@@ -63,6 +63,76 @@ export class AuthController {
     });
   }
 
+  @Post('test-login')
+  async testLogin(@Body() body: { email: string; password: string }, @Res() res: Response) {
+    console.log('=== TEST LOGIN ENDPOINT ===');
+    console.log('Test login attempt:', { email: body.email, password: body.password ? '***provided***' : '***missing***' });
+    
+    try {
+      // Try to find user in smes table
+      const user = await this.dataSource.query(
+        'SELECT * FROM smes WHERE email = $1',
+        [body.email]
+      );
+      console.log('SME user search result:', user);
+
+      if (user[0]) {
+        console.log('SME user found, checking password...');
+        const valid = await bcrypt.compare(body.password, user[0].password);
+        console.log('Password valid:', valid);
+        
+        if (valid) {
+          const payload = { 
+            sub: user[0].id, 
+            email: user[0].email,
+            company_name: user[0].company_name,
+            is_admin: false,
+            is_sme: true 
+          };
+          console.log('SME user JWT payload:', payload);
+          
+          const token = this.jwtService.sign(payload);
+          console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
+          
+          // Set JWT cookie - same as login endpoint
+          const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+          const isLocalhost = frontendDomain.includes('localhost');
+          
+          const cookieOptions = {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'lax' as const,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            domain: isLocalhost ? 'localhost' : undefined,
+          };
+          
+          console.log('Setting JWT cookie with options:', cookieOptions);
+          res.cookie('jwt', token, cookieOptions);
+          console.log('JWT cookie set successfully');
+          
+          return res.json({ 
+            message: 'Test login successful', 
+            user: { 
+              id: user[0].id, 
+              email: user[0].email,
+              company_name: user[0].company_name,
+              is_admin: false,
+              is_sme: true 
+            },
+            cookieOptions
+          });
+        } else {
+          return res.status(401).json({ message: 'Invalid password' });
+        }
+      } else {
+        return res.status(401).json({ message: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Test login error:', error);
+      return res.status(500).json({ message: 'Test login failed', error: error.message });
+    }
+  }
+
   @Post('login')
   async login(@Body() body: { email: string; password: string }, @Res() res: Response) {
     console.log('=== LOGIN ATTEMPT START ===');
@@ -97,13 +167,16 @@ export class AuthController {
         const token = this.jwtService.sign(payload);
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
-        // Set JWT cookie - set for Railway domain so frontend can access it
+        // Set JWT cookie - set for localhost domain so frontend can access it
+        const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+        const isLocalhost = frontendDomain.includes('localhost');
+        
         const cookieOptions = {
           httpOnly: false, // Allow JavaScript access for debugging
           secure: false, // Always false for now to avoid HTTPS issues
           sameSite: 'lax' as const, // Compatible with secure: false
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          // No domain restriction - will be set for Railway domain
+          domain: isLocalhost ? 'localhost' : undefined, // Set domain for localhost
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
