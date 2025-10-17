@@ -73,12 +73,15 @@ export class AuthController {
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
         // Set JWT cookie - corrected settings for browser compatibility
+        const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
+        const isLocalhost = frontendDomain.includes('localhost');
+        
         const cookieOptions = {
           httpOnly: false, // Allow JavaScript access for debugging
           secure: false, // Always false for now to avoid HTTPS issues
           sameSite: 'lax' as const, // Compatible with secure: false
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          // No domain restriction - let browser handle it
+          domain: isLocalhost ? 'localhost' : undefined, // Set domain for localhost
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
