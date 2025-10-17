@@ -27,23 +27,37 @@ export class AuthController {
     const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
     const isLocalhost = frontendDomain.includes('localhost');
     
-    const cookieOptions = {
+    // Set cookie for both domains to test
+    const localhostCookieOptions = {
       httpOnly: false,
       secure: false,
       sameSite: 'lax' as const,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: isLocalhost ? 'localhost' : undefined,
+      domain: 'localhost',
+    };
+    
+    const railwayCookieOptions = {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax' as const,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      // No domain - will be set for current domain
     };
     
     console.log('Frontend domain:', frontendDomain);
     console.log('Is localhost:', isLocalhost);
-    console.log('Setting test cookie with options:', cookieOptions);
-    res.cookie('test_cookie', 'test_value_123', cookieOptions);
-    console.log('Test cookie set successfully');
+    console.log('Setting localhost test cookie with options:', localhostCookieOptions);
+    console.log('Setting railway test cookie with options:', railwayCookieOptions);
+    
+    res.cookie('test_cookie_localhost', 'test_value_localhost', localhostCookieOptions);
+    res.cookie('test_cookie_railway', 'test_value_railway', railwayCookieOptions);
+    
+    console.log('Test cookies set successfully');
     
     return res.json({ 
-      message: 'Test cookie set', 
-      cookieOptions,
+      message: 'Test cookies set for both domains', 
+      localhostCookieOptions,
+      railwayCookieOptions,
       frontendDomain,
       isLocalhost
     });
