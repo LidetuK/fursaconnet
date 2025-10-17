@@ -27,7 +27,7 @@ export class AuthController {
     const cookieOptions = {
       httpOnly: false,
       secure: false,
-      sameSite: 'none' as const,
+      sameSite: 'lax' as const, // Changed from 'none' to 'lax'
       maxAge: 7 * 24 * 60 * 60 * 1000,
     };
     
@@ -72,11 +72,11 @@ export class AuthController {
         const token = this.jwtService.sign(payload);
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
-        // Set JWT cookie - most permissive settings for debugging
+        // Set JWT cookie - corrected settings for browser compatibility
         const cookieOptions = {
           httpOnly: false, // Allow JavaScript access for debugging
           secure: false, // Always false for now to avoid HTTPS issues
-          sameSite: 'none' as const, // Most permissive
+          sameSite: 'lax' as const, // Compatible with secure: false
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
           // No domain restriction - let browser handle it
         };
