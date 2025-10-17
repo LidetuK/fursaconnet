@@ -21,6 +21,23 @@ export class AuthController {
     return { status: 'ok', timestamp: new Date().toISOString() };
   }
 
+  @Get('test-cookie')
+  testCookie(@Res() res: Response) {
+    console.log('=== TEST COOKIE ENDPOINT ===');
+    const cookieOptions = {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'none' as const,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
+    
+    console.log('Setting test cookie with options:', cookieOptions);
+    res.cookie('test_cookie', 'test_value_123', cookieOptions);
+    console.log('Test cookie set successfully');
+    
+    return res.json({ message: 'Test cookie set', cookieOptions });
+  }
+
   @Post('login')
   async login(@Body() body: { email: string; password: string }, @Res() res: Response) {
     console.log('=== LOGIN ATTEMPT START ===');
