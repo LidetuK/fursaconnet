@@ -39,10 +39,11 @@ export class TwitterOAuth2Controller {
       // Store codeVerifier in cookie
       res.cookie('twitter_code_verifier', codeVerifier, { 
         httpOnly: true, 
-        sameSite: 'lax', 
+        sameSite: 'none', // Allow cross-site cookies for OAuth flows
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 10 * 60 * 1000 // 10 minutes
+        maxAge: 10 * 60 * 1000, // 10 minutes
+        domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined,
       });
       
       const clientId = this.configService.get<string>('TWITTER_CLIENT_ID');

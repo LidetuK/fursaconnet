@@ -97,10 +97,10 @@ export class AuthController {
           // Set JWT cookie - same as login endpoint
           const cookieOptions = {
             httpOnly: false,
-            secure: false,
-            sameSite: 'lax' as const,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none' as const, // Allow cross-site cookies for OAuth flows
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            // No domain restriction - will be set for Railway domain
+            domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined,
           };
           
           console.log('Setting JWT cookie with options:', cookieOptions);
@@ -170,10 +170,10 @@ export class AuthController {
         
         const cookieOptions = {
           httpOnly: false, // Allow JavaScript access for debugging
-          secure: false, // Always false for now to avoid HTTPS issues
-          sameSite: 'lax' as const, // Compatible with secure: false
+          secure: process.env.NODE_ENV === 'production', // Secure in production
+          sameSite: 'none' as const, // Allow cross-site cookies for OAuth flows
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          // No domain restriction - will be set for Railway domain so Twitter callback can access it
+          domain: process.env.NODE_ENV === 'production' ? '.railway.app' : undefined, // Explicit domain for Railway
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
