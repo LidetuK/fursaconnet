@@ -95,15 +95,12 @@ export class AuthController {
           console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
           
           // Set JWT cookie - same as login endpoint
-          const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
-          const isLocalhost = frontendDomain.includes('localhost');
-          
           const cookieOptions = {
             httpOnly: false,
             secure: false,
             sameSite: 'lax' as const,
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            domain: isLocalhost ? 'localhost' : undefined,
+            // No domain restriction - will be set for Railway domain
           };
           
           console.log('Setting JWT cookie with options:', cookieOptions);
@@ -167,7 +164,7 @@ export class AuthController {
         const token = this.jwtService.sign(payload);
         console.log('SME user JWT token generated:', token ? 'Yes' : 'No');
         
-        // Set JWT cookie - set for localhost domain so frontend can access it
+        // Set JWT cookie - set for Railway domain so Twitter callback can access it
         const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
         const isLocalhost = frontendDomain.includes('localhost');
         
@@ -176,12 +173,14 @@ export class AuthController {
           secure: false, // Always false for now to avoid HTTPS issues
           sameSite: 'lax' as const, // Compatible with secure: false
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          domain: isLocalhost ? 'localhost' : undefined, // Set domain for localhost
+          // No domain restriction - will be set for Railway domain so Twitter callback can access it
         };
         
         console.log('Setting JWT cookie with options:', cookieOptions);
+        console.log('JWT token to set:', token ? 'Token present' : 'Token missing');
         res.cookie('jwt', token, cookieOptions);
         console.log('JWT cookie set successfully');
+        console.log('Cookie domain set to: Railway domain (default)');
         
         const response = {
           access_token: token,

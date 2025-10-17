@@ -89,7 +89,12 @@ export class TwitterOAuth2Controller {
   @Get('callback')
   async handleCallback(@Req() req: Request, @Res() res: Response, @Query() query: any) {
     try {
+      console.log('=== TWITTER CALLBACK DEBUG ===');
       console.log('Twitter callback received');
+      console.log('All cookies received:', req.cookies);
+      console.log('JWT cookie specifically:', req.cookies['jwt']);
+      console.log('Request headers:', req.headers);
+      console.log('Query parameters:', query);
       
       const { code, state, error } = query;
       if (error) {
