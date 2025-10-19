@@ -88,6 +88,11 @@ export class YouTubeAuthController {
     }
     
     // Use YouTube-specific callback URL
+    console.log('Environment variables debug:');
+    console.log('YOUTUBE_CALLBACK_URL:', process.env.YOUTUBE_CALLBACK_URL);
+    console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
+    console.log('GOOGLE_REDIRECT_URI:', process.env.GOOGLE_REDIRECT_URI);
+    
     const redirectUri = process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback';
     const scope = 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload';
     const state = encodeURIComponent(JSON.stringify({ userId, platform: 'youtube' })); // Include user ID in state
@@ -328,5 +333,3 @@ export class YouTubeAuthController {
     }
   }
 } 
-#   F o r c e   r e d e p l o y   1 0 / 1 9 / 2 0 2 5   2 2 : 4 1 : 4 3  
- 
