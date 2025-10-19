@@ -112,8 +112,8 @@ export class YouTubeAuthController {
       GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
       YOUTUBE_CALLBACK_URL: process.env.YOUTUBE_CALLBACK_URL,
       GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
+      GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
       GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? '***SET***' : '***NOT SET***',
-      defaultRedirectUri: 'https://fursaconnet-production.up.railway.app/auth/google/callback',
       finalRedirectUri: process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback',
       timestamp: new Date().toISOString()
     };
