@@ -113,14 +113,14 @@ export class GoogleAuthController {
       // Set JWT as httpOnly cookie
       res.cookie('jwt', jwt, { httpOnly: true });
       // Redirect to frontend dashboard with success status
-      const frontendDomain = process.env.FRONTEND_URL || 'https://premium-promospace-frontend-production.up.railway.app';
+      const frontendDomain = process.env.FRONTEND_URL || 'https://fursa-connect-frontend-production.up.railway.app';
       const redirectUrl = `${frontendDomain}/dashboard?google=connected`;
       console.log('Redirecting to frontend:', redirectUrl);
       return res.redirect(redirectUrl);
     } catch (err) {
       console.error('OAuth error:', err);
       // Redirect to frontend dashboard with error status
-      const frontendDomain = process.env.FRONTEND_URL || 'https://premium-promospace-frontend-production.up.railway.app';
+      const frontendDomain = process.env.FRONTEND_URL || 'https://fursa-connect-frontend-production.up.railway.app';
       const redirectUrl = `${frontendDomain}/dashboard?google=error&message=${encodeURIComponent(err.message)}`;
       console.log('Redirecting to frontend error page:', redirectUrl);
       return res.redirect(redirectUrl);
