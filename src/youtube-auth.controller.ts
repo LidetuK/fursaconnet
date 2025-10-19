@@ -5,6 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SocialAccount } from './users/social-account.entity';
+import * as dotenv from 'dotenv';
+dotenv.config(); // Force load environment variables
 
 @Controller('auth/youtube')
 export class YouTubeAuthController {
@@ -12,7 +14,13 @@ export class YouTubeAuthController {
     private readonly jwtService: JwtService,
     @InjectRepository(SocialAccount)
     private readonly socialAccountRepo: Repository<SocialAccount>,
-  ) {}
+  ) {
+    console.log('=== ENVIRONMENT VARIABLES DEBUG ===');
+    console.log('YOUTUBE_CALLBACK_URL:', process.env.YOUTUBE_CALLBACK_URL);
+    console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
+    console.log('GOOGLE_REDIRECT_URI:', process.env.GOOGLE_REDIRECT_URI);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+  }
 
   @Get()
   async redirectToGoogle(@Req() req: Request, @Res() res: Response) {
@@ -93,7 +101,9 @@ export class YouTubeAuthController {
     console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
     console.log('GOOGLE_REDIRECT_URI:', process.env.GOOGLE_REDIRECT_URI);
     
-    const redirectUri = process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback';
+    // Hardcoded fallback if environment variables are not loading
+    const callbackUrl = process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback';
+    const redirectUri = callbackUrl;
     const scope = 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload';
     const state = encodeURIComponent(JSON.stringify({ userId, platform: 'youtube' })); // Include user ID in state
 
@@ -332,6 +342,4 @@ export class YouTubeAuthController {
       });
     }
   }
-} 
-#   F o r c e   r e d e p l o y   1 0 / 2 0 / 2 0 2 5   0 0 : 2 1 : 4 4  
- 
+}
