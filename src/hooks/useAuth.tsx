@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       // Call backend logout endpoint to clear cookie
-      await fetch('https://premium-promospace-production.up.railway.app/auth/logout', {
+      await fetch('https://fursaconnet-production.up.railway.app/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });

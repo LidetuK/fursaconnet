@@ -143,7 +143,7 @@ const ConnectSocialMediaSection = () => {
     // Fetch Twitter username from backend if connected
     const fetchTwitterUsername = async () => {
       try {
-        const response = await fetch('https://premium-promospace-production.up.railway.app/user/social-accounts/twitter', {
+        const response = await fetch('https://fursaconnet-production.up.railway.app/user/social-accounts/twitter', {
           method: 'GET',
           credentials: 'include',
         });
@@ -166,7 +166,7 @@ const ConnectSocialMediaSection = () => {
     // Fetch YouTube channel name from backend if connected
     const fetchYoutubeChannel = async () => {
       try {
-        const response = await fetch('https://premium-promospace-production.up.railway.app/user/social-accounts/youtube', {
+        const response = await fetch('https://fursaconnet-production.up.railway.app/user/social-accounts/youtube', {
           method: 'GET',
           credentials: 'include',
         });
@@ -188,7 +188,7 @@ const ConnectSocialMediaSection = () => {
     // Fetch LinkedIn name from backend if connected
     const fetchLinkedinName = async () => {
       try {
-        const response = await fetch('https://premium-promospace-production.up.railway.app/user/social-accounts/linkedin', {
+        const response = await fetch('https://fursaconnet-production.up.railway.app/user/social-accounts/linkedin', {
           method: 'GET',
           credentials: 'include',
         });
@@ -209,7 +209,7 @@ const ConnectSocialMediaSection = () => {
   const handleConnect = (platformId: string) => {
     if (platformId === 'twitter') {
       // Redirect to backend Twitter OAuth 2.0 endpoint
-      window.location.href = 'https://premium-promospace-production.up.railway.app/auth/twitter2';
+      window.location.href = 'https://fursaconnet-production.up.railway.app/auth/twitter2';
       return;
     }
     if (platformId === 'youtube') {
@@ -222,13 +222,13 @@ const ConnectSocialMediaSection = () => {
       console.log('Starting YouTube OAuth with token:', token.substring(0, 20) + '...');
       
       // Use window.location.href directly to avoid CORS issues
-      const url = `https://premium-promospace-production.up.railway.app/auth/youtube?token=${encodeURIComponent(token)}`;
+      const url = `https://fursaconnet-production.up.railway.app/auth/youtube?token=${encodeURIComponent(token)}`;
       console.log('Redirecting to:', url);
       window.location.href = url;
       return;
     }
     if (platformId === 'linkedin') {
-      window.location.href = 'https://premium-promospace-production.up.railway.app/auth/linkedin';
+      window.location.href = 'https://fursaconnet-production.up.railway.app/auth/linkedin';
       return;
     }
     setPlatforms(platforms.map(platform => 
@@ -241,7 +241,7 @@ const ConnectSocialMediaSection = () => {
   const handleDisconnect = async (platformId: string) => {
     if (platformId === 'twitter' || platformId === 'youtube' || platformId === 'linkedin') {
       try {
-        const response = await fetch(`https://premium-promospace-production.up.railway.app/user/social-accounts/${platformId}`, {
+        const response = await fetch(`https://fursaconnet-production.up.railway.app/user/social-accounts/${platformId}`, {
           method: 'DELETE',
           credentials: 'include',
         });

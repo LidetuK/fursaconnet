@@ -34,7 +34,7 @@ const TrackingScriptModal = ({ isOpen, onClose }: TrackingScriptModalProps) => {
 
     setIsGenerating(true);
     try {
-      const response = await fetch('https://premium-promospace-production.up.railway.app/analytics/generate-tracking-script', {
+      const response = await fetch('https://fursaconnet-production.up.railway.app/analytics/generate-tracking-script', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

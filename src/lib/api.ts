@@ -1,5 +1,5 @@
 export async function registerUser({ email, password, name }: { email: string; password: string; name: string }) {
-  const res = await fetch('https://premium-promospace-production.up.railway.app/auth/register', {
+  const res = await fetch('https://fursaconnet-production.up.railway.app/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, name }),
@@ -14,7 +14,7 @@ export async function loginUser({ email, password }: { email: string; password: 
   console.log('loginUser called with email:', email);
   console.log('Cookies before login:', document.cookie);
   
-  const res = await fetch('https://premium-promospace-production.up.railway.app/auth/login', {
+  const res = await fetch('https://fursaconnet-production.up.railway.app/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -46,7 +46,7 @@ export async function getCurrentUser() {
   console.log('Current cookies:', document.cookie);
   
   // Use cookies instead of localStorage tokens to match backend authentication
-  const res = await fetch('https://premium-promospace-production.up.railway.app/auth/me', {
+  const res = await fetch('https://fursaconnet-production.up.railway.app/auth/me', {
     method: 'GET',
     credentials: 'include', // This sends cookies
   });
@@ -78,7 +78,7 @@ export async function ping() {
   console.log('Pinging backend...');
   console.log('Current cookies:', document.cookie);
   
-  const res = await fetch('https://premium-promospace-production.up.railway.app/auth/ping', {
+  const res = await fetch('https://fursaconnet-production.up.railway.app/auth/ping', {
     method: 'GET',
     credentials: 'include',
   });
@@ -91,7 +91,7 @@ export async function ping() {
 }
 
 export async function registerSme({ email, company_name, password, company_logo }: { email: string; company_name: string; password: string; company_logo: string }) {
-  const res = await fetch('https://premium-promospace-production.up.railway.app/auth/register-sme', {
+  const res = await fetch('https://fursaconnet-production.up.railway.app/auth/register-sme', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, company_name, password, company_logo }),

@@ -13,7 +13,7 @@ export function GoogleBusinessPerformance({ accessToken }: { accessToken: string
       setLoading(true);
       setError(null);
       try {
-        let res = await fetch("https://premium-promospace-production.up.railway.app/auth/google/business-locations", {
+        let res = await fetch("https://fursaconnet-production.up.railway.app/auth/google/business-locations", {
           method: "GET",
           credentials: "include",
         });
@@ -41,7 +41,7 @@ export function GoogleBusinessPerformance({ accessToken }: { accessToken: string
     setPerformance(null);
     try {
       // Call your NestJS backend endpoint for Google business performance
-      const res = await fetch("https://premium-promospace-production.up.railway.app/auth/google/business-performance", {
+      const res = await fetch("https://fursaconnet-production.up.railway.app/auth/google/business-performance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

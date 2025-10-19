@@ -43,7 +43,7 @@ export class GoogleAuthController {
       
       if (isYouTubeOAuth) {
         // Handle YouTube OAuth - redirect to YouTube callback with state
-        const youtubeCallbackUrl = `https://premium-promospace-production.up.railway.app/auth/youtube/callback?code=${code}&scope=${scope}&state=${state}`;
+        const youtubeCallbackUrl = `https://fursaconnet-production.up.railway.app/auth/youtube/callback?code=${code}&scope=${scope}&state=${state}`;
         console.log('Redirecting to YouTube callback:', youtubeCallbackUrl);
         return res.redirect(youtubeCallbackUrl);
       }

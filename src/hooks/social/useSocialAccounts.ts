@@ -23,7 +23,7 @@ export const useSocialAccounts = () => {
       let accounts: SocialAccount[] = [];
       try {
         // Fetch from backend
-        const res = await fetch('https://premium-promospace-production.up.railway.app/user/social-accounts', {
+        const res = await fetch('https://fursaconnet-production.up.railway.app/user/social-accounts', {
           method: 'GET',
           credentials: 'include',
         });

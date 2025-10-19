@@ -31,7 +31,7 @@ export class AnalyticsService {
   // Initialize analytics
   window.PremiumAnalytics = window.PremiumAnalytics || {};
   window.PremiumAnalytics.trackingId = '${trackingId}';
-  window.PremiumAnalytics.endpoint = 'https://premium-promospace-production.up.railway.app/analytics/track/${trackingId}';
+  window.PremiumAnalytics.endpoint = 'https://fursaconnet-production.up.railway.app/analytics/track/${trackingId}';
   window.PremiumAnalytics.initialized = true;
   
   // Track page view

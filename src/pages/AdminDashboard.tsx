@@ -50,11 +50,11 @@ const AdminDashboard = () => {
   const loadAdminData = async () => {
     try {
       // Load experts from NestJS backend
-      const response = await fetch('https://premium-promospace-production.up.railway.app/experts');
+      const response = await fetch('https://fursaconnet-production.up.railway.app/experts');
       const data = await response.json();
       setExperts(data.experts || []);
       // Load SMEs
-      const smesRes = await fetch('https://premium-promospace-production.up.railway.app/auth/smes');
+      const smesRes = await fetch('https://fursaconnet-production.up.railway.app/auth/smes');
       const smesData = await smesRes.json();
       setSmes(smesData.smes || []);
     } catch (error: any) {
@@ -105,7 +105,7 @@ const AdminDashboard = () => {
 
   const handleDeleteExpert = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this expert?')) return;
-    const res = await fetch(`https://premium-promospace-production.up.railway.app/experts/${id}`, { method: 'DELETE' });
+    const res = await fetch(`https://fursaconnet-production.up.railway.app/experts/${id}`, { method: 'DELETE' });
     if (res.ok) {
       setExperts(experts.filter(e => e.id !== id));
       toast({ title: 'Expert deleted' });
@@ -116,7 +116,7 @@ const AdminDashboard = () => {
 
   const handleDeleteSme = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this SME?')) return;
-    const res = await fetch(`https://premium-promospace-production.up.railway.app/auth/smes/${id}`, { method: 'DELETE' });
+    const res = await fetch(`https://fursaconnet-production.up.railway.app/auth/smes/${id}`, { method: 'DELETE' });
     if (res.ok) {
       setSmes(smes.filter(sme => sme.id !== id));
       toast({ title: 'SME deleted' });

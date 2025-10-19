@@ -87,7 +87,7 @@ const SocialMediaConnector = () => {
     if (!user || !telegramUsername.trim()) return;
     setTelegramConnecting(true);
     try {
-      const res = await fetch('https://premium-promospace-production.up.railway.app/telegram/connect', {
+      const res = await fetch('https://fursaconnet-production.up.railway.app/telegram/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, chatId: telegramUsername.trim() }),
@@ -182,7 +182,7 @@ const SocialMediaConnector = () => {
                   console.log('Starting YouTube OAuth with token:', token.substring(0, 20) + '...');
                   
                   // Use window.location.href directly to avoid CORS issues
-                  const url = `https://premium-promospace-production.up.railway.app/auth/youtube?token=${encodeURIComponent(token)}`;
+                  const url = `https://fursaconnet-production.up.railway.app/auth/youtube?token=${encodeURIComponent(token)}`;
                   console.log('Redirecting to:', url);
                   window.location.href = url;
                 }}

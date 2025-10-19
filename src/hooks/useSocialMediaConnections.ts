@@ -41,7 +41,7 @@ export const useSocialMediaConnections = () => {
       setLoading(true);
       try {
         // Redirect to backend Twitter OAuth 2.0 endpoint
-        window.location.href = 'https://premium-promospace-production.up.railway.app/auth/twitter2';
+        window.location.href = 'https://fursaconnet-production.up.railway.app/auth/twitter2';
       } catch (error) {
         console.error('Error initiating Twitter OAuth:', error);
         toast({
@@ -66,7 +66,7 @@ export const useSocialMediaConnections = () => {
       setLoading(true);
       try {
         // Redirect to backend LinkedIn OAuth endpoint
-        window.location.href = 'https://premium-promospace-production.up.railway.app/auth/linkedin';
+        window.location.href = 'https://fursaconnet-production.up.railway.app/auth/linkedin';
       } catch (error) {
         console.error('Error initiating LinkedIn OAuth:', error);
         toast({
@@ -100,7 +100,7 @@ export const useSocialMediaConnections = () => {
     setLoading(true);
     try {
       // Call backend to disconnect the social account
-      const response = await fetch(`https://premium-promospace-production.up.railway.app/user/social-accounts/${platform}`, {
+      const response = await fetch(`https://fursaconnet-production.up.railway.app/user/social-accounts/${platform}`, {
         method: 'DELETE',
         credentials: 'include',
       });

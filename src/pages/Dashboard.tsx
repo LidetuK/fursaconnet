@@ -64,7 +64,7 @@ const Dashboard = () => {
   // Quick fix: Sync Google access token from backend to Supabase
   useEffect(() => {
     if (user) {
-      fetch('https://premium-promospace-production.up.railway.app/auth/google/get-token', {
+      fetch('https://fursaconnet-production.up.railway.app/auth/google/get-token', {
         method: 'GET',
         credentials: 'include',
       })

@@ -256,7 +256,7 @@ export const ExpertRegistryForm = () => {
       };
       
       // Send to backend
-      const response = await fetch('https://premium-promospace-production.up.railway.app/experts', {
+      const response = await fetch('https://fursaconnet-production.up.railway.app/experts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

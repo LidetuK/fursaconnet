@@ -15,7 +15,7 @@ export function YouTubePostSection() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('https://premium-promospace-production.up.railway.app/auth/youtube/channel', {
+        const res = await fetch('https://fursaconnet-production.up.railway.app/auth/youtube/channel', {
           credentials: 'include',
         });
         const data = await res.json();
@@ -37,7 +37,7 @@ export function YouTubePostSection() {
     const fetchTwitterData = async () => {
       setTwitterError(null);
       try {
-        const res = await fetch('https://premium-promospace-production.up.railway.app/auth/twitter2/posts', {
+        const res = await fetch('https://fursaconnet-production.up.railway.app/auth/twitter2/posts', {
           credentials: 'include',
         });
         const data = await res.json();
@@ -57,7 +57,7 @@ export function YouTubePostSection() {
     const fetchLinkedinPosts = async () => {
       setLinkedinError(null);
       try {
-        const res = await fetch('https://premium-promospace-production.up.railway.app/auth/linkedin/posts', {
+        const res = await fetch('https://fursaconnet-production.up.railway.app/auth/linkedin/posts', {
           credentials: 'include',
         });
         const data = await res.json();

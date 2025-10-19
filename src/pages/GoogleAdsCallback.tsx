@@ -9,7 +9,7 @@ export default function GoogleAdsCallback() {
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
     if (code) {
-      fetch('https://premium-promospace-production.up.railway.app/auth/google-ads/callback', {
+      fetch('https://fursaconnet-production.up.railway.app/auth/google-ads/callback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

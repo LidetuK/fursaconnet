@@ -23,7 +23,7 @@ const SocialMediaPostSection = () => {
   useEffect(() => {
     if (selectedPlatform === 'linkedin') {
       // Fetch organizations from backend
-      fetch('https://premium-promospace-production.up.railway.app/auth/linkedin/organizations', {
+      fetch('https://fursaconnet-production.up.railway.app/auth/linkedin/organizations', {
         method: 'GET',
         credentials: 'include',
       })
@@ -86,7 +86,7 @@ const SocialMediaPostSection = () => {
     setLoading(true);
     try {
       if (selectedPlatform === 'twitter') {
-        const response = await fetch('https://premium-promospace-production.up.railway.app/auth/twitter2/post', {
+        const response = await fetch('https://fursaconnet-production.up.railway.app/auth/twitter2/post', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ const SocialMediaPostSection = () => {
         formData.append('text', postText);
         images.forEach((img, idx) => formData.append('images', img));
         // Do NOT append organizationUrn, always post as personal
-        const response = await fetch('https://premium-promospace-production.up.railway.app/auth/linkedin/post', {
+        const response = await fetch('https://fursaconnet-production.up.railway.app/auth/linkedin/post', {
           method: 'POST',
           credentials: 'include',
           body: formData,

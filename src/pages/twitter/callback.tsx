@@ -63,7 +63,7 @@ const TwitterCallback = () => {
 
         // Call the backend endpoint for Twitter OAuth 2.0
         console.log('Calling backend Twitter callback endpoint');
-        const response = await fetch('https://premium-promospace-production.up.railway.app/auth/twitter2/callback?code=' + encodeURIComponent(code) + (state ? ('&state=' + encodeURIComponent(state)) : ''), {
+        const response = await fetch('https://fursaconnet-production.up.railway.app/auth/twitter2/callback?code=' + encodeURIComponent(code) + (state ? ('&state=' + encodeURIComponent(state)) : ''), {
           method: 'GET',
           credentials: 'include',
         });

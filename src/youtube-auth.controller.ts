@@ -107,8 +107,8 @@ export class YouTubeAuthController {
       GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
       YOUTUBE_REDIRECT_URI: process.env.YOUTUBE_REDIRECT_URI,
       GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? '***SET***' : '***NOT SET***',
-      defaultRedirectUri: 'https://premium-promospace-production.up.railway.app/auth/google/callback',
-      finalRedirectUri: process.env.YOUTUBE_REDIRECT_URI || 'https://premium-promospace-production.up.railway.app/auth/google/callback'
+      defaultRedirectUri: 'https://fursaconnet-production.up.railway.app/auth/google/callback',
+      finalRedirectUri: process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback'
     };
     
     return res.json(config);

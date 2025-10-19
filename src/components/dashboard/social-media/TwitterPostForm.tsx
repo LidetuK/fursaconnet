@@ -23,7 +23,7 @@ export const UnifiedPostForm = () => {
 
     setIsPosting(true);
     try {
-      const response = await fetch('https://premium-promospace-production.up.railway.app/auth/twitter2/post', {
+      const response = await fetch('https://fursaconnet-production.up.railway.app/auth/twitter2/post', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
