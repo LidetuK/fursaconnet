@@ -87,8 +87,8 @@ export class YouTubeAuthController {
       return res.status(500).json({ error: 'Server configuration error' });
     }
     
-    // Use the same pattern as Google OAuth for consistency
-    const redirectUri = process.env.GOOGLE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/google/callback';
+    // Use YouTube-specific callback URL
+    const redirectUri = process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback';
     const scope = 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.upload';
     const state = encodeURIComponent(JSON.stringify({ userId, platform: 'youtube' })); // Include user ID in state
 
@@ -179,7 +179,7 @@ export class YouTubeAuthController {
           code,
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          redirect_uri: process.env.GOOGLE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/google/callback',
+          redirect_uri: process.env.YOUTUBE_CALLBACK_URL || 'https://fursaconnet-production.up.railway.app/auth/youtube/callback',
           grant_type: 'authorization_code',
         },
         headers: {
@@ -218,13 +218,13 @@ export class YouTubeAuthController {
       
       console.log('JWT cookie set, redirecting to dashboard with success');
       
-      // 6. Redirect to YouTube callback page with success message and token
-      return res.redirect(`${frontendDomain}/auth/youtube/callback?youtube=connected&token=${encodeURIComponent(newToken)}`);
+      // 6. Redirect to dashboard with success message and token
+      return res.redirect(`${frontendDomain}/dashboard?youtube=connected&token=${encodeURIComponent(newToken)}`);
     } catch (err: any) {
       console.error('YouTube token exchange error:', err.response?.data || err.message);
       // Redirect to frontend domain since /dashboard is a frontend route
       const frontendDomain = process.env.FRONTEND_URL || 'http://localhost:8080';
-      return res.redirect(`${frontendDomain}/auth/youtube/callback?youtube=error`);
+      return res.redirect(`${frontendDomain}/dashboard?youtube=error`);
     }
   }
 
