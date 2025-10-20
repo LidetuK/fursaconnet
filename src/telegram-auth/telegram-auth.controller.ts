@@ -9,8 +9,8 @@ import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-class ConnectTelegramDto { userId: string; chatId: string; }
-class SendTelegramMessageDto { userId: string; text: string; }
+class ConnectTelegramDto { chatId: string; }
+class SendTelegramMessageDto { text: string; }
 const userTelegramChannels: Record<string, { chatId: string }> = {};
 
 @Controller('telegram')
@@ -22,26 +22,36 @@ export class TelegramAuthController {
     private readonly jwtService: JwtService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('connect')
-  async connect(@Body() body: ConnectTelegramDto) {
-    console.log('=== TELEGRAM CONNECT BACKEND DEBUG ===');
-    console.log('Received body:', body);
-    console.log('User ID from body:', body.userId);
-    console.log('Chat ID from body:', body.chatId);
-    console.log('=== TELEGRAM CONNECT BACKEND DEBUG END ===');
-    
-    const userIdString = body.userId.toString();
+  async connect(@Req() req: Request, @Body() body: ConnectTelegramDto) {
+    const userJwt: any = (req as any).user;
+    if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+    const userId = parseInt(userJwt.sub.toString(), 10);
+    if (!body?.chatId) return { success: false, error: 'Missing chatId' };
+
+    const userIdString = userId.toString();
     userTelegramChannels[userIdString] = { chatId: body.chatId };
-    await this.socialAccountRepo.upsert({ user_id: parseInt(body.userId, 10), platform: 'telegram', platform_user_id: body.chatId, screen_name: body.chatId }, ['user_id', 'platform']);
+    await this.socialAccountRepo.upsert(
+      { user_id: userId, platform: 'telegram', platform_user_id: body.chatId, screen_name: body.chatId },
+      ['user_id', 'platform'],
+    );
     return { success: true, message: 'Telegram channel connected.' };
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('update')
-  async updateChannel(@Body() body: ConnectTelegramDto) {
-    const result = await this.socialAccountRepo.update({ user_id: parseInt(body.userId, 10), platform: 'telegram' }, { platform_user_id: body.chatId, screen_name: body.chatId, updated_at: new Date() });
+  async updateChannel(@Req() req: Request, @Body() body: ConnectTelegramDto) {
+    const userJwt: any = (req as any).user;
+    if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+    const userId = parseInt(userJwt.sub.toString(), 10);
+    if (!body?.chatId) return { success: false, error: 'Missing chatId' };
+    const result = await this.socialAccountRepo.update(
+      { user_id: userId, platform: 'telegram' },
+      { platform_user_id: body.chatId, screen_name: body.chatId, updated_at: new Date() },
+    );
     if (result.affected === 0) return { success: false, error: 'No Telegram connection found to update' };
-    userTelegramChannels[body.userId.toString()] = { chatId: body.chatId };
+    userTelegramChannels[userId.toString()] = { chatId: body.chatId };
     return { success: true, message: 'Telegram channel updated.' };
   }
 
@@ -56,30 +66,40 @@ export class TelegramAuthController {
     return { success: true, message: 'Telegram channel disconnected.' };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('test')
-  async testConnection(@Body() body: { userId: string }) {
-    if (!body.userId) return { success: false, error: 'Missing userId parameter' };
-    const socialAccount = await this.socialAccountRepo.findOne({ where: { user_id: parseInt(body.userId, 10), platform: 'telegram' } });
+  async testConnection(@Req() req: Request) {
+    const userJwt: any = (req as any).user;
+    if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+    const userId = parseInt(userJwt.sub.toString(), 10);
+    const socialAccount = await this.socialAccountRepo.findOne({ where: { user_id: userId, platform: 'telegram' } });
     if (!socialAccount) return { success: false, error: 'No Telegram channel connected for this user.' };
     const result = await this.telegramService.getChatInfo(socialAccount.platform_user_id);
     return { success: true, chatInfo: result, message: 'Telegram connection is working properly.' };
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('send')
   @UseInterceptors(FilesInterceptor('images', 10))
-  async send(@Body() body: SendTelegramMessageDto, @UploadedFiles() files: Express.Multer.File[]) {
-    if (!body.userId || !body.text) return { success: false, error: 'Missing userId or text parameter' };
-    const socialAccount = await this.socialAccountRepo.findOne({ where: { user_id: parseInt(body.userId, 10), platform: 'telegram' } });
+  async send(@Req() req: Request, @Body() body: SendTelegramMessageDto, @UploadedFiles() files: Express.Multer.File[]) {
+    const userJwt: any = (req as any).user;
+    if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+    if (!body.text) return { success: false, error: 'Missing text parameter' };
+    const userId = parseInt(userJwt.sub.toString(), 10);
+    const socialAccount = await this.socialAccountRepo.findOne({ where: { user_id: userId, platform: 'telegram' } });
     if (!socialAccount) return { success: false, error: 'No Telegram channel connected for this user.' };
     if (files && files.length > 0) return this.telegramService.sendMessageWithImages(socialAccount.platform_user_id, body.text, files);
     return this.telegramService.sendMessage(socialAccount.platform_user_id, body.text);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('send-video')
   @UseInterceptors(FilesInterceptor('videos', 10))
-  async sendVideo(@Body() body: { userId: string; caption?: string }, @UploadedFiles() files: Express.Multer.File[]) {
-    if (!body.userId) return { success: false, error: 'Missing userId' };
-    const socialAccount = await this.socialAccountRepo.findOne({ where: { user_id: parseInt(body.userId, 10), platform: 'telegram' } });
+  async sendVideo(@Req() req: Request, @Body() body: { caption?: string }, @UploadedFiles() files: Express.Multer.File[]) {
+    const userJwt: any = (req as any).user;
+    if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+    const userId = parseInt(userJwt.sub.toString(), 10);
+    const socialAccount = await this.socialAccountRepo.findOne({ where: { user_id: userId, platform: 'telegram' } });
     if (!socialAccount) return { success: false, error: 'No Telegram channel connected' };
     if (!files || files.length === 0) return { success: false, error: 'No video files uploaded' };
     return this.telegramService.sendVideos(socialAccount.platform_user_id, body.caption, files);
