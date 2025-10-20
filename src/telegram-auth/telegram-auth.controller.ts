@@ -24,6 +24,12 @@ export class TelegramAuthController {
 
   @Post('connect')
   async connect(@Body() body: ConnectTelegramDto) {
+    console.log('=== TELEGRAM CONNECT BACKEND DEBUG ===');
+    console.log('Received body:', body);
+    console.log('User ID from body:', body.userId);
+    console.log('Chat ID from body:', body.chatId);
+    console.log('=== TELEGRAM CONNECT BACKEND DEBUG END ===');
+    
     const userIdString = body.userId.toString();
     userTelegramChannels[userIdString] = { chatId: body.chatId };
     await this.socialAccountRepo.upsert({ user_id: parseInt(body.userId, 10), platform: 'telegram', platform_user_id: body.chatId, screen_name: body.chatId }, ['user_id', 'platform']);
