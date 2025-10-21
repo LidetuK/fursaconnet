@@ -25,18 +25,28 @@ export class TelegramAuthController {
   @UseGuards(JwtAuthGuard)
   @Post('connect')
   async connect(@Req() req: Request, @Body() body: ConnectTelegramDto) {
-    const userJwt: any = (req as any).user;
-    if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
-    const userId = parseInt(userJwt.sub.toString(), 10);
-    if (!body?.chatId) return { success: false, error: 'Missing chatId' };
+    try {
+      const userJwt: any = (req as any).user;
+      if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+      const userId = parseInt(userJwt.sub.toString(), 10);
+      if (!body?.chatId) return { success: false, error: 'Missing chatId' };
 
-    const userIdString = userId.toString();
-    userTelegramChannels[userIdString] = { chatId: body.chatId };
-    await this.socialAccountRepo.upsert(
-      { user_id: userId, platform: 'telegram', platform_user_id: body.chatId, screen_name: body.chatId },
-      ['user_id', 'platform'],
-    );
-    return { success: true, message: 'Telegram channel connected.' };
+      console.log('=== TELEGRAM CONNECT DEBUG ===');
+      console.log('User ID from JWT:', userId);
+      console.log('Chat ID from body:', body.chatId);
+      console.log('=== TELEGRAM CONNECT DEBUG END ===');
+
+      const userIdString = userId.toString();
+      userTelegramChannels[userIdString] = { chatId: body.chatId };
+      await this.socialAccountRepo.upsert(
+        { user_id: userId, platform: 'telegram', platform_user_id: body.chatId, screen_name: body.chatId },
+        ['user_id', 'platform'],
+      );
+      return { success: true, message: 'Telegram channel connected.' };
+    } catch (error) {
+      console.error('Telegram connect error:', error);
+      return { success: false, error: 'Failed to connect Telegram: ' + error.message };
+    }
   }
 
   @UseGuards(JwtAuthGuard)
