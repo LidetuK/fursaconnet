@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Delete, Req, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Body, Controller, Post, Delete, Req, UseGuards, UseInterceptors, UploadedFiles, Get } from '@nestjs/common';
 import { TelegramAuthService } from './telegram-auth.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,6 +21,15 @@ export class TelegramAuthController {
     @InjectRepository(PostEntity) private readonly postRepo: Repository<PostEntity>,
     private readonly jwtService: JwtService,
   ) {}
+
+  @Get('test-jwt')
+  @UseGuards(JwtAuthGuard)
+  async testJwt(@Req() req: Request) {
+    console.log('=== TELEGRAM JWT TEST ===');
+    console.log('Request user:', (req as any).user);
+    console.log('=== TELEGRAM JWT TEST END ===');
+    return { success: true, user: (req as any).user };
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post('connect')
