@@ -14,6 +14,7 @@ class SendTelegramMessageDto { text: string; }
 const userTelegramChannels: Record<string, { chatId: string }> = {};
 
 @Controller('telegram')
+@UseGuards(JwtAuthGuard)
 export class TelegramAuthController {
   constructor(
     private readonly telegramService: TelegramAuthService,
@@ -31,7 +32,6 @@ export class TelegramAuthController {
     return { success: true, user: (req as any).user };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('connect')
   async connect(@Req() req: Request, @Body() body: ConnectTelegramDto) {
     try {
