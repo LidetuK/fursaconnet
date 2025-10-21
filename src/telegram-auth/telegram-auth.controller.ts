@@ -27,7 +27,10 @@ export class TelegramAuthController {
   async connect(@Req() req: Request, @Body() body: ConnectTelegramDto) {
     try {
       console.log('=== TELEGRAM CONNECT DEBUG ===');
-      console.log('Request object:', req);
+      console.log('Request URL:', req.url);
+      console.log('Request method:', req.method);
+      console.log('Request headers:', req.headers);
+      console.log('Request cookies:', req.cookies);
       console.log('Request user:', (req as any).user);
       console.log('Body:', body);
       console.log('=== TELEGRAM CONNECT DEBUG END ===');
