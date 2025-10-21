@@ -26,15 +26,25 @@ export class TelegramAuthController {
   @Post('connect')
   async connect(@Req() req: Request, @Body() body: ConnectTelegramDto) {
     try {
+      console.log('=== TELEGRAM CONNECT DEBUG ===');
+      console.log('Request object:', req);
+      console.log('Request user:', (req as any).user);
+      console.log('Body:', body);
+      console.log('=== TELEGRAM CONNECT DEBUG END ===');
+      
       const userJwt: any = (req as any).user;
-      if (!userJwt?.sub) return { success: false, error: 'Unauthorized' };
+      if (!userJwt || !userJwt.sub) {
+        console.error('No user JWT found:', userJwt);
+        return { success: false, error: 'Unauthorized - No user JWT found' };
+      }
+      
       const userId = parseInt(userJwt.sub.toString(), 10);
       if (!body?.chatId) return { success: false, error: 'Missing chatId' };
 
-      console.log('=== TELEGRAM CONNECT DEBUG ===');
+      console.log('=== TELEGRAM CONNECT SUCCESS ===');
       console.log('User ID from JWT:', userId);
       console.log('Chat ID from body:', body.chatId);
-      console.log('=== TELEGRAM CONNECT DEBUG END ===');
+      console.log('=== TELEGRAM CONNECT SUCCESS END ===');
 
       const userIdString = userId.toString();
       userTelegramChannels[userIdString] = { chatId: body.chatId };
