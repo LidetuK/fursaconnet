@@ -32,7 +32,17 @@ export class TelegramAuthController {
     return { success: true, user: (req as any).user };
   }
 
+  @Post('test-no-guard')
+  async testNoGuard(@Req() req: Request, @Body() body: any) {
+    console.log('=== TELEGRAM NO GUARD TEST ===');
+    console.log('Request user:', (req as any).user);
+    console.log('Body:', body);
+    console.log('=== TELEGRAM NO GUARD TEST END ===');
+    return { success: true, user: (req as any).user, body };
+  }
+
   @Post('connect')
+  @UseGuards(JwtAuthGuard)
   async connect(@Req() req: Request, @Body() body: ConnectTelegramDto) {
     try {
       console.log('=== TELEGRAM CONNECT DEBUG ===');
