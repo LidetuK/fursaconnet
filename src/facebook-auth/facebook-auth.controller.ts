@@ -53,27 +53,60 @@ export class FacebookAuthController {
       }
 
       // Store Facebook user account
-      await this.socialAccountRepo.upsert({
-        user_id: parseInt(userId.toString(), 10),
-        platform: 'facebook',
-        platform_user_id: userInfo.id,
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
-        screen_name: userInfo.name || userInfo.first_name || '',
-      }, ['user_id', 'platform']);
+      const existingAccount = await this.socialAccountRepo.findOne({
+        where: { user_id: parseInt(userId.toString(), 10), platform: 'facebook' }
+      });
+
+      if (existingAccount) {
+        await this.socialAccountRepo.update(
+          { user_id: parseInt(userId.toString(), 10), platform: 'facebook' },
+          {
+            platform_user_id: userInfo.id,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+            screen_name: userInfo.name || userInfo.first_name || '',
+          }
+        );
+      } else {
+        await this.socialAccountRepo.save({
+          user_id: parseInt(userId.toString(), 10),
+          platform: 'facebook',
+          platform_user_id: userInfo.id,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+          screen_name: userInfo.name || userInfo.first_name || '',
+        });
+      }
 
       // Store each Facebook page as a separate social account
       for (const page of pages) {
-        await this.socialAccountRepo.upsert({
-          user_id: parseInt(userId.toString(), 10),
-          platform: 'facebook_page',
-          platform_user_id: page.id,
-          access_token: page.access_token,
-          refresh_token: refreshToken,
-          expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
-          screen_name: page.name || '',
-        }, ['user_id', 'platform', 'platform_user_id']);
+        const existingPage = await this.socialAccountRepo.findOne({
+          where: { user_id: parseInt(userId.toString(), 10), platform: 'facebook_page', platform_user_id: page.id }
+        });
+
+        if (existingPage) {
+          await this.socialAccountRepo.update(
+            { user_id: parseInt(userId.toString(), 10), platform: 'facebook_page', platform_user_id: page.id },
+            {
+              access_token: page.access_token,
+              refresh_token: refreshToken,
+              expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+              screen_name: page.name || '',
+            }
+          );
+        } else {
+          await this.socialAccountRepo.save({
+            user_id: parseInt(userId.toString(), 10),
+            platform: 'facebook_page',
+            platform_user_id: page.id,
+            access_token: page.access_token,
+            refresh_token: refreshToken,
+            expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+            screen_name: page.name || '',
+          });
+        }
       }
 
       // Set JWT as httpOnly cookie
