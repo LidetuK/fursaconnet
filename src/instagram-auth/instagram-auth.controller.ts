@@ -55,15 +55,31 @@ export class InstagramAuthController {
 
       // Store Instagram accounts
       for (const instagramAccount of instagramAccounts) {
-        await this.socialAccountRepo.upsert({
-          user_id: parseInt(userId.toString(), 10),
-          platform: 'instagram',
-          platform_user_id: instagramAccount.id,
-          access_token: accessToken, // Use the same access token for now
-          refresh_token: refreshToken,
-          expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
-          screen_name: instagramAccount.username || instagramAccount.name || '',
-        }, ['user_id', 'platform', 'platform_user_id']);
+        const existingAccount = await this.socialAccountRepo.findOne({
+          where: { user_id: parseInt(userId.toString(), 10), platform: 'instagram', platform_user_id: instagramAccount.id }
+        });
+
+        if (existingAccount) {
+          await this.socialAccountRepo.update(
+            { user_id: parseInt(userId.toString(), 10), platform: 'instagram', platform_user_id: instagramAccount.id },
+            {
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+              screen_name: instagramAccount.username || instagramAccount.name || '',
+            }
+          );
+        } else {
+          await this.socialAccountRepo.save({
+            user_id: parseInt(userId.toString(), 10),
+            platform: 'instagram',
+            platform_user_id: instagramAccount.id,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000) : undefined,
+            screen_name: instagramAccount.username || instagramAccount.name || '',
+          });
+        }
       }
 
       // Set JWT as httpOnly cookie
